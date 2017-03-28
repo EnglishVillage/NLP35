@@ -6,6 +6,7 @@
 http://www.cnblogs.com/lijingpeng/p/5787549.html
 """
 
+import os
 import pandas as pd
 import numpy as np
 import re
@@ -23,16 +24,15 @@ from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB as GNB
 from sklearn.ensemble import RandomForestClassifier
 
-wkzpath = "D:/MyDocument/MyWork/ML/ChinaHandoopML/Sources/NLP35/"
 
 # 载入数据集
-train = pd.read_csv(wkzpath + 'labeledTrainData.tsv', header=0, delimiter="\t", quoting=3)
-test = pd.read_csv(wkzpath + 'testData.tsv', header=0, delimiter="\t", quoting=3)
+train = pd.read_csv(os.path.join("./sources","labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
+test = pd.read_csv(os.path.join("./sources","testData.tsv"), header=0, delimiter="\t", quoting=3)
 print(train.head(1))
 print(test.head(1))
 
 
-# 预处理数据
+# 预处理数据，得到单词数组【去HTML标签，去掉非字母字符】
 def review_to_wordlist(review):
 	'''
 	把IMDB的评论转成词序列
@@ -62,42 +62,42 @@ print(test_data[0])
 
 
 
-# # 特征处理【用于朴素贝叶斯和逻辑回归】
-# # 参考：http://blog.csdn.net/longxinchen_ml/article/details/50629613
-# tfidf = TFIDF(min_df=2,  # 最小支持度为2
-# 			  max_features=None,
-# 			  strip_accents='unicode',
-# 			  analyzer='word',
-# 			  token_pattern=r'\w{1,}',
-# 			  ngram_range=(1, 3),  # 二元文法模型
-# 			  use_idf=1,
-# 			  smooth_idf=1,
-# 			  sublinear_tf=1,
-# 			  stop_words='english')  # 去掉英文停用词
-# # 合并训练和测试集以便进行TFIDF向量化操作
-# data_all = train_data + test_data
-# len_train = len(train_data)
-# tfidf.fit(data_all)
-# data_all = tfidf.transform(data_all)
-# # 恢复成训练集和测试集部分
-# train_x = data_all[:len_train]
-# test_x = data_all[len_train:]
-# print('TF-IDF处理结束.')
+# 特征处理【用于朴素贝叶斯和逻辑回归】
+# 参考：http://blog.csdn.net/longxinchen_ml/article/details/50629613
+tfidf = TFIDF(min_df=2,  # 最小支持度为2
+			  max_features=None,
+			  strip_accents='unicode',
+			  analyzer='word',
+			  token_pattern=r'\w{1,}',
+			  ngram_range=(1, 3),  # 二元文法模型
+			  use_idf=1,
+			  smooth_idf=1,
+			  sublinear_tf=1,
+			  stop_words='english')  # 去掉英文停用词
+# 合并训练和测试集以便进行TFIDF向量化操作
+data_all = train_data + test_data
+len_train = len(train_data)
+tfidf.fit(data_all)
+data_all = tfidf.transform(data_all)
+# 恢复成训练集和测试集部分
+train_x = data_all[:len_train]
+test_x = data_all[len_train:]
+print('TF-IDF处理结束.')
 
 
 
-# # 1.朴素贝叶斯训练
-# model_NB = MNB()
-# model_NB.fit(train_x, label)
-# MNB(alpha=1.0, class_prior=None, fit_prior=True)
-# print("多项式贝叶斯分类器10折交叉验证得分: ", np.mean(cross_val_score(model_NB, train_x, label, cv=10, scoring='roc_auc')))
-# test_predicted = np.array(model_NB.predict(test_x))
-# print('保存结果...')
-# nb_output = pd.DataFrame(data=test_predicted, columns=['sentiment'])
-# nb_output['id'] = test['id']
-# nb_output = nb_output[['id', 'sentiment']]
+# 1.朴素贝叶斯训练
+model_NB = MNB()
+model_NB.fit(train_x, label)
+MNB(alpha=1.0, class_prior=None, fit_prior=True)
+print("多项式贝叶斯分类器10折交叉验证得分: ", np.mean(cross_val_score(model_NB, train_x, label, cv=10, scoring='roc_auc')))
+test_predicted = np.array(model_NB.predict(test_x))
+print('保存结果...')
+nb_output = pd.DataFrame(data=test_predicted, columns=['sentiment'])
+nb_output['id'] = test['id']
+nb_output = nb_output[['id', 'sentiment']]
 # nb_output.to_csv('nb_output.csv', index=False)
-# print('结束.')
+print('结束.')
 
 
 
@@ -129,42 +129,42 @@ print(test_data[0])
 
 
 
-# Word2vec
-tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-
-def review_to_wordlist(review, remove_stopwords=False):
-	review_text = BeautifulSoup(review, "html.parser").get_text()
-	review_text = re.sub("[^a-zA-Z]", " ", review_text)
-	words = review_text.lower().split()
-	if remove_stopwords:
-		stops = set(stopwords.words("english"))
-		words = [w for w in words if not w in stops]
-	return (words)
-
-def review_to_sentences(review, tokenizer, remove_stopwords=False):
-	'''
-	将评论段落转换为句子，返回句子列表，每个句子由一堆词组成
-	'''
-	# raw_sentences = tokenizer.tokenize(review.strip().decode('utf8'))
-	raw_sentences = tokenizer.tokenize(review.strip())
-
-	sentences = []
-	for raw_sentence in raw_sentences:
-		if len(raw_sentence) > 0:
-			# 获取句子中的词列表
-			sentences.append(review_to_wordlist(raw_sentence, remove_stopwords))
-	return sentences
-
-sentences = []
-for i, review in enumerate(train["review"]):
-	sentences += review_to_sentences(review, tokenizer)
-
-unlabeled_train = pd.read_csv(wkzpath + "unlabeledTrainData.tsv", header=0, delimiter="\t", quoting=3)
-for review in unlabeled_train["review"]:
-	sentences += review_to_sentences(review, tokenizer)
-print('预处理unlabeled_train data...')
-print(len(train_data))
-print(len(sentences))
+# # Word2vec
+# tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+#
+# def review_to_wordlist(review, remove_stopwords=False):
+# 	review_text = BeautifulSoup(review, "html.parser").get_text()
+# 	review_text = re.sub("[^a-zA-Z]", " ", review_text)
+# 	words = review_text.lower().split()
+# 	if remove_stopwords:
+# 		stops = set(stopwords.words("english"))
+# 		words = [w for w in words if not w in stops]
+# 	return (words)
+#
+# def review_to_sentences(review, tokenizer, remove_stopwords=False):
+# 	'''
+# 	将评论段落转换为句子，返回句子列表，每个句子由一堆词组成
+# 	'''
+# 	# raw_sentences = tokenizer.tokenize(review.strip().decode('utf8'))
+# 	raw_sentences = tokenizer.tokenize(review.strip())
+#
+# 	sentences = []
+# 	for raw_sentence in raw_sentences:
+# 		if len(raw_sentence) > 0:
+# 			# 获取句子中的词列表
+# 			sentences.append(review_to_wordlist(raw_sentence, remove_stopwords))
+# 	return sentences
+#
+# sentences = []
+# for i, review in enumerate(train["review"]):
+# 	sentences += review_to_sentences(review, tokenizer)
+#
+unlabeled_train = pd.read_csv(os.path.join("./sources","unlabeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
+# for review in unlabeled_train["review"]:
+# 	sentences += review_to_sentences(review, tokenizer)
+# print('预处理unlabeled_train data...')
+# print(len(train_data))
+# print(len(sentences))
 
 
 
@@ -187,7 +187,7 @@ num_features = 300  # Word vector dimensionality
 # model.save(model_name)
 
 # 从已经训练好的模型中加载使用
-# model = gensim.models.Word2Vec.load(wkzpath + "300features_40minwords_10context")
+# model = gensim.models.Word2Vec.load(os.path.join("./target","300features_40minwords_10context"))
 
 
 # 预览模型
