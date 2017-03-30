@@ -16,6 +16,7 @@ from sklearn.metrics import confusion_matrix
 
 import nltk
 from nltk.corpus import stopwords
+import pickle
 
 # from sklearn.naive_bayes import MultinomialNB as MNB
 # from sklearn.cross_validation import cross_val_score
@@ -26,10 +27,12 @@ from nltk.corpus import stopwords
 # from gensim.models import Word2Vec
 # from sklearn.naive_bayes import GaussianNB as GNB
 
+print("start")
 
-datafile = os.path.join(".", "labeledTrainData.tsv")
+
+# datafile = os.path.join(".","sources", "labeledTrainData.tsv")
 # print(datafile)	#.\labeledTrainData.tsv
-df = pd.read_csv(datafile, sep="\t", escapechar="\\")
+# df = pd.read_csv(datafile, sep="\t", escapechar="\\")
 
 
 # print("Number of reviews:{}".format(len(df)))
@@ -42,67 +45,85 @@ def display(text, title):
 	print(text)
 
 
-raw_example = df["review"][0]
+# raw_example = df["r/eview"][0]
 # display(raw_example,"示例数据")
 
-example = BeautifulSoup(raw_example, "html.parser").get_text()
-# display(example,"去掉html标签")
-
-example_letters = re.sub(r"[^a-zA-Z]", " ", example)
-# display(example_letters, "去掉标点符号")
-
-words = example_letters.lower().split()
-# display(words,"纯词列表数据")
-
-
-stopwords=[line.rstrip() for line in open("./stopwords.txt")]
 # stopwords={}.fromkeys([line.rstrip() for line in open("./stopwords.txt")])
+# stopwords = [line.rstrip() for line in open("./stopwords.txt")]
 # print(stopwords)
-words_nostop=[w for w in words if w not in stopwords]
-# display(words_nostop,"去掉停用词数据")
 
-eng_stopwords=set(stopwords)
+
+# eng_stopwords = set(stopwords)
+eng_stopwords=set(stopwords.words("english"))
+
 def clean_text(text):
-	text=BeautifulSoup(text, "html.parser").get_text()
-	text=re.sub(r"[^a-zA-Z]", " ", text)
-	words=text.lower().split()
-	words=[w for w in words if w not in eng_stopwords]
+	# 去掉html标签
+	text = BeautifulSoup(text, "html.parser").get_text()
+	# 去掉标点符号
+	text = re.sub(r"[^a-zA-Z]", " ", text)
+	# 纯词列表数据
+	words = text.lower().split()
+	# 去掉停用词数据
+	words = [w for w in words if w not in eng_stopwords]
 	return " ".join(words)
+
+
 # cleantext=clean_text(raw_example)
 # print(cleantext)
 
-#对每一行使用清洗函数,并保存到新列中
-df["clean_review"]=df.review.apply(clean_text)
+# 对每一行使用清洗函数,并保存到新列中
+# df["clean_review"]=df.review.apply(clean_text)
 # print(df.head())
 
 # 抽取bag of words特征(用sklearn的CountVectorizer)
-#从中获取总共5000个词作为词典
-vectorizer=CountVectorizer(max_features=5000)
-train_data_features=vectorizer.fit_transform(df.clean_review).toarray()
+# 从中获取总共5000个词作为词典
+vectorizer = CountVectorizer(max_features=5000)
+
+# train_data_features=vectorizer.fit_transform(df.clean_review).toarray()
 # print(train_data_features.shape)	#(25000, 5000)
 # print(train_data_features)	#总共5000个词,随机分配到二维数组中
 
 # 训练分类器
-forest = RandomForestClassifier(n_estimators=100)
-forest=forest.fit(train_data_features,df.sentiment)
+# forest = RandomForestClassifier(n_estimators=100)
+# forest=forest.fit(train_data_features,df.sentiment)
 
-confusion=confusion_matrix(df.sentiment,forest.predict(train_data_features))
-print(confusion)
-#返回结果,甚麽意思?
+# 保存模型
+forestpkl = os.path.join(".", "wkztarget", "forest.pkl")
+# with open(forestpkl, 'wb') as f:
+#     pickle.dump(forest, f)
+
+
+
+#
+# confusion=confusion_matrix(df.sentiment,forest.predict(train_data_features))
+# print(confusion)
+# 返回结果,甚麽意思?
+# 矩阵的每一列表示预测类中的实例，而每行表示实际类中的实例
 # [[12500     0]
 #  [    0 12500]]
 
 # 删除不用的占内存变量
-del df
-del train_data_features
+# del df
+# del train_data_features
 
-datafile = os.path.join(".", "testData.tsv")
+datafile = os.path.join(".", "sources", "testData.tsv")
 df = pd.read_csv(datafile, sep="\t", escapechar="\\")
-print("Number of reviews:{}".format(len(df)))
-df["clean_review"]=df.review.apply(clean_text)
-print(df.head())
+df["clean_review"] = df.review.apply(clean_text)
+# print("Number of reviews:{}".format(len(df)))
+# print(df.head())
 
+# 抽取bag of words特征(用sklearn的CountVectorizer)
+# 从中获取总共5000个词作为词典
+test_data_features = vectorizer.fit_transform(df.clean_review).toarray()
+# print(test_data_features.shape)
 
+# 从文件中读取模型
+forest = pickle.load(open(forestpkl, 'rb'))
+result = forest.predict(test_data_features)
+output = pd.DataFrame({"id": df.id, "sentiment": result})
+# print(output.head())
 
+output.to_csv(os.path.join(".", "wkztarget", "Bag_of_Words_model.csv"), index=False)
 
-
+# del df
+# del train_data_features
