@@ -7,7 +7,7 @@ kaggle:https://www.kaggle.com/c/word2vec-nlp-tutorial/data
 参考:http://www.cnblogs.com/lijingpeng/p/5787549.html
 """
 
-import os
+import os,sys
 import pandas as pd
 import numpy as np
 import re
@@ -28,6 +28,9 @@ try:
 	import json  # python >= 2.6
 except ImportError:
 	import simplejson as json  # python <= 2.5
+
+# 导入自定义的包
+sys.path.append(os.path.join("..", "utils"))
 from utils import OtherUtils
 
 
@@ -45,6 +48,9 @@ test_data = OtherUtils.get_deal_data(test["review"])
 
 
 # # Word2vec
+# 神经网络语言模型L = SUM[log(p(w|contect(w))]，即在w的上下文下计算当前词w的概率，
+# 由公式可以看到，我们的核心是计算p(w|contect(w)， Word2vec给出了构造这个概率的一个方法。
+
 # tokenizer = nltk.data.load(OtherUtils.tokenizer_english)
 #
 # sentences = OtherUtils.get_sentences_data(train["review"],tokenizer)
@@ -131,14 +137,23 @@ print("高斯贝叶斯分类器10折交叉验证得分: ", np.mean(cross_val_sco
 result = model_GNB.predict(testDataVecs)
 output = pd.DataFrame(data={"id": test["id"], "sentiment": result})
 output.to_csv("gnb_word2vec.csv", index=False, quoting=3)
+# 从验证结果来看，没有超过基于TF-IDF多项式贝叶斯模型
+
 
 
 # 随机森林+Word2vec训练
 forest = RandomForestClassifier(n_estimators=100, n_jobs=2)
 print("Fitting a random forest to labeled training data...")
 forest.fit(trainDataVecs, label)#这里返回的是同一个对象
+
+
 print("随机森林分类器10折交叉验证得分: ", np.mean(cross_val_score(forest, trainDataVecs, label, cv=10, scoring='roc_auc')))
 # 测试集
 result = forest.predict(testDataVecs)
 output = pd.DataFrame(data={"id": test["id"], "sentiment": result})
 output.to_csv("rf_word2vec.csv", index=False, quoting=3)
+# 改用随机森林之后，效果有提升，但是依然没有超过基于TF-IDF多项式贝叶斯模型
+
+
+
+
