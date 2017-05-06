@@ -23,7 +23,7 @@ except ImportError:
    import pickle
 
 #将本文件路径告诉环境
-sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
+# sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
 
 tokenizer_english = "tokenizers/punkt/english.pickle"
 
@@ -56,7 +56,7 @@ def review_to_sentences(review: str, tokenizer, remove_stopwords=False):
 	将评论段落转换为句子，返回句子列表，每个句子由一堆词组成
 	'''
 	# python3.5不需要转化
-	# raw_sentences = tokenizer.tokenize(review.strip().decode('utf8'))
+	# raw_sentences = tokenizer.tokenize(review.strip().decode('utf-8'))
 	raw_sentences = tokenizer.tokenize(review.strip())
 
 	sentences = []

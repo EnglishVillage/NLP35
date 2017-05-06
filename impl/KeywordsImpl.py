@@ -70,7 +70,7 @@ freqandtag = "@@3@@nz"
 
 def writefile(path: str, set: set):
 	# 写入到文件中
-	with open(path, "w", encoding="utf8") as f:
+	with open(path, "w", encoding="utf-8") as f:
 		tagList = list(set)
 		tagList.sort(key=lambda str: len(str), reverse=False)
 		length = len(tagList) - 1

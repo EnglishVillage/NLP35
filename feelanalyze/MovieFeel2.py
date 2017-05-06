@@ -19,7 +19,7 @@ from nltk.corpus import stopwords
 import pickle
 
 # 导入自定义的包
-sys.path.append(os.path.join("..", "utils"))
+# sys.path.append(os.path.join("..", "utils"))
 from utils import OtherUtils
 
 
@@ -35,13 +35,14 @@ from utils import OtherUtils
 print("start")
 
 
-datafile = os.path.join(".","sources", "labeledTrainData.tsv")
+datafile = os.path.join("..","sources", "labeledTrainData.tsv")
+# df = pd.read_csv(datafile, header=0, delimiter="\t", quoting=3)
 df = pd.read_csv(datafile, sep="\t", escapechar="\\")
 # print(datafile)	#.\labeledTrainData.tsv
 
 
 # print("Number of reviews:{}".format(len(df)))
-# print(df.head())
+print(df.head())
 # print(df["review"][0])
 
 def display(text, title):
