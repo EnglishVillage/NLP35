@@ -1,12 +1,19 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-import sys
-import os
+import os, sys, re, time
 import pymysql
 
-#将本文件路径告诉环境
-sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
+# 将本文件路径告诉环境
+# sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
+from utils import CollectionUtils
+
+host = "192.168.1.136"
+port = 3306
+user = "root"
+passwd = "hblc123"
+_db = "base"
+
 
 def getrowswithfull(host: str, port: int, user: str, passwd: str, db: str, sql: str):
 	"""
@@ -45,10 +52,94 @@ def getrowswithfull(host: str, port: int, user: str, passwd: str, db: str, sql: 
 	conn.close()
 	return cursor.fetchall()
 
+
 def getrows(sql: str):
 	"""
 	根据sql查询返回查询列表
 	:param sql: sql语句
 	:return: 查询列表
 	"""
-	return getrowswithfull("192.168.1.136", 3306, "root", "hblc123", "base", sql)
+	return getrowswithfull(host=host, port=port, user=user, passwd=passwd, db=_db, sql=sql)
+
+
+def _add_tag_set(myset: set, value, islower=True):
+	"""
+	将值转化为str并添加到set集合中
+	:param set: set集合
+	:param value: 值
+	:return: 空
+	"""
+	if value is not None:
+		if type(value) is str:
+			value = value.strip()
+			if value:
+				if islower:
+					value = value.lower().replace("\n", "")
+				else:
+					value = value.replace("\n", "")
+				myset.add(value)
+		else:
+			if islower:
+				myset.add(str(value).strip().lower())
+			else:
+				myset.add(str(value).strip())
+
+
+def _rows_to_set(rows: tuple, islower=True):
+	myset = set()
+	for row in rows:
+		if isinstance(row, tuple):
+			for value in row:
+				_add_tag_set(myset, value, islower)
+		else:
+			_add_tag_set(myset, row, islower)
+	return myset
+
+
+def _add_tag_dict(mydict: dict, key, value, islower=True):
+	if key is not None:
+		if type(key) is str:
+			key = key.strip()
+			if key:
+				if islower:
+					key = key.lower().replace("\n", "")
+				else:
+					key = key.replace("\n", "")
+		else:
+			if islower:
+				key = str(key).strip().lower()
+			else:
+				key = str(key).strip()
+		if key:
+			CollectionUtils.add_dict_setvalue_single(mydict, key, value)
+
+
+def _rows_to_dict(rows: tuple, islower=True):
+	mydict = {}
+	for row in rows:
+		if isinstance(row, tuple):
+			for index in range(1, len(row)):
+				_add_tag_dict(mydict, row[index], row[0], islower)
+	return mydict
+
+
+def sql_to_set(sql: str, islower=True):
+	"""
+	将sql查询结果转化为set集合,用于生成字典
+	:param sql:sql语句
+	:param islower: 是否转化为小写,默认转化为小写
+	:return:String类型的set集合
+	"""
+	rows = getrows(sql)
+	return _rows_to_set(rows, islower)
+
+
+def sql_to_dict(sql: str, islower=True):
+	"""
+	将sql查询结果转化为dict集合,用于生成字典
+	:param sql:sql语句
+	:param islower: 是否转化为小写,默认转化为小写
+	:return:String类型的set集合
+	"""
+	rows = getrows(sql)
+	return _rows_to_dict(rows, islower)

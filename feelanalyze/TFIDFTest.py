@@ -12,10 +12,9 @@ kaggle:https://www.kaggle.com/c/word2vec-nlp-tutorial/data
 """
 
 
-import os,sys
+import os, sys, re, time
 import pandas as pd
 import numpy as np
-import re
 from bs4 import BeautifulSoup
 from sklearn.feature_extraction.text import TfidfVectorizer as TFIDF
 from sklearn.naive_bayes import MultinomialNB as MNB
@@ -25,7 +24,6 @@ from sklearn.grid_search import GridSearchCV
 import gensim
 import nltk
 from nltk.corpus import stopwords
-import time
 import pickle
 from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB as GNB
@@ -37,49 +35,25 @@ except ImportError:
 
 # 导入自定义的包
 sys.path.append(os.path.join("..", "utils"))
-from utils import OtherUtils
+
+from utils import TFIDFUtils,OtherUtils
 
 
 
 
 # 载入数据集
-train = pd.read_csv(os.path.join(".", "sources", "labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
-test = pd.read_csv(os.path.join(".", "sources","testData.tsv"), header=0, delimiter="\t", quoting=3)
+train = pd.read_csv(os.path.join("..", "sources", "labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
+test = pd.read_csv(os.path.join("..", "sources","testData.tsv"), header=0, delimiter="\t", quoting=3)
 
 label = train['sentiment']
 
 train_data = OtherUtils.get_deal_data(train["review"])
 test_data = OtherUtils.get_deal_data(test["review"])
-#
-# # # 特征处理【用于朴素贝叶斯和逻辑回归】
-# # # 参考：http://blog.csdn.net/longxinchen_ml/article/details/50629613
-# tfidf = TFIDF(min_df=2,  # 最小支持度为2
-# 			  max_features=None,
-# 			  strip_accents='unicode',
-# 			  analyzer='word',
-# 			  token_pattern=r'\w{1,}',
-# 			  ngram_range=(1, 3),  # 二元文法模型
-# 			  use_idf=1,
-# 			  smooth_idf=1,		#平滑idf的参数可设置大于0的数,use_idf设置为True才有效.
-# 			  sublinear_tf=1,
-# 			  stop_words='english')  # 去掉英文停用词
-
 
 
 # # 合并训练和测试集以便进行TFIDF向量化操作
 data_all = train_data + test_data
-# tfidf.fit(data_all)
-# # 保存模型
-# model_name="tfidf.pkl"
-# OtherUtils.save_fit_model(model_name, tfidf)
-model_name="tfidf.pkl"
-tfidf=OtherUtils.load_fit_model(model_name)
-
-
-
-
-# 恢复成训练集和测试集部分
-data_all = tfidf.transform(data_all)
+tfidf,data_all =TFIDFUtils.get_transform_data("tfidf.pkl",data_all)
 # print(tfidf.get_feature_names()[:20])		#获取所有特征值
 # print(data_all[:20].toarray())			#获取特征值所对应的向量(该特征值不存在,在index处不存在用0表示)
 
@@ -125,17 +99,18 @@ print("多项式贝叶斯分类器10折交叉验证得分: ", np.mean(cross_val_
 # # 保存模型
 # model_name="lr.pkl"
 # OtherUtils.save_fit_model(model_name, model_LR)
-model_name="lr.pkl"
-model_LR=OtherUtils.load_fit_model(model_name)
 
-# 20折交叉验证
-lr = LR(C=1.0, class_weight=None, dual=True, fit_intercept=True, intercept_scaling=1, penalty='l2', random_state=0, tol=0.0001)
-GridSearchCV(cv=20, estimator=lr,
-        fit_params={}, iid=True, n_jobs=1,
-        param_grid={'C': [30]}, pre_dispatch='2*n_jobs', refit=True,
-        scoring='roc_auc', verbose=0)
-#输出结果
-print (model_LR.grid_scores_)
+# model_name="lr.pkl"
+# model_LR=OtherUtils.load_fit_model(model_name)
+#
+# # 20折交叉验证
+# lr = LR(C=1.0, class_weight=None, dual=True, fit_intercept=True, intercept_scaling=1, penalty='l2', random_state=0, tol=0.0001)
+# GridSearchCV(cv=20, estimator=lr,
+#         fit_params={}, iid=True, n_jobs=1,
+#         param_grid={'C': [30]}, pre_dispatch='2*n_jobs', refit=True,
+#         scoring='roc_auc', verbose=0)
+# #输出结果
+# print (model_LR.grid_scores_)
 
 # 1. 提交最终的结果到kaggle，AUC为：0.88956，排名260左右，比之前贝叶斯模型有所提高
 # 2. 三元文法，AUC为0.89076

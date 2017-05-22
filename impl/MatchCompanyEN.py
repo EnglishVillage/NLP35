@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+
 import os, sys, re, time
 from operator import itemgetter
 
@@ -9,37 +10,7 @@ import csv
 from utils import OtherUtils, MysqlUtils, MongodbUtils
 
 
-def addtag(set: set, value):
-	"""
-	将值转化为str并添加到set集合中
-	:param set: set集合
-	:param value: 值
-	:return: 空
-	"""
-	if value is not None:
-		if type(value) is str:
-			value = value.strip()
-			if value:
-				value = value.lower().replace("\n", "")
-				set.add(value)
-		else:
-			set.add(str(value).strip())
 
-
-def rowstoset(rows: tuple):
-	myset = set()
-	for row in rows:
-		if isinstance(row, tuple):
-			for value in row:
-				addtag(myset, value)
-		else:
-			addtag(myset, row)
-	return myset
-
-
-def sqltoset(sql: str):
-	rows = MysqlUtils.getrows(sql)
-	return rowstoset(rows)
 
 
 stopwords = ["corp.,ltd.", "s.a.r.l.", "co.,ltd.", "s.p.a.", "s.a.s", "corp.", "inc.", "b.v.", "n.v.", "co.,", "pty.",
@@ -51,8 +22,7 @@ stopwords2 = ["biopharmaceuticals", "biopharmaceutical", "pharmaceuticals", "pha
 			  "products", "medicine", "holdings", "venture", "science", "biology", "biotech", "limited", "company",
 			  "medical", "health", "pharma", "group", "funds", "fund", "labs", "gmbh", "kgaa", "lllp", "lab", "bio",
 			  "inc", "llp", "jsc", "aps", "plc", "llc", "ltd", "ag", "kg", "lp", "oy", "sa", "bv", "ab", "nv"]
-# 用户也可以在此进行自定义过滤字符
-r1 = '[’!"#$%&\'()*+,-./:;<=>?@，。?★、．…【】《》（）？“”‘’！[\\]^_`{|}~]+'
+
 path_dict = os.path.join("..", "wkztarget", "company.txt")
 path_right = os.path.join("..", "wkztarget", "right.txt")
 path_error = os.path.join("..", "wkztarget", "error.txt")
@@ -69,7 +39,7 @@ def preDeal(data: str):
 	data = data.lstrip()
 	words = data.split()
 	# 去除含有特殊字符的停止词,并去除特殊字符
-	words = [re.sub(r1, "", w) for w in words if not w in stopwords]
+	words = [re.sub(OtherUtils.special_chars, "", w) for w in words if not w in stopwords]
 	# 去除通用公司名称
 	words = [w for w in words if not w in stopwords2]
 	# 用空格连接词组
@@ -80,8 +50,8 @@ def preDeal(data: str):
 
 
 def writedict():
-	# set_company = sqltoset("select standard_name_en,full_name_en,alternative_name,name_FDA from yymf_discover_company")
-	set_company = sqltoset("select standard_name_en,full_name_en from yymf_discover_company")
+	# set_company = MysqlUtils.sqltoset("select standard_name_en,full_name_en,alternative_name,name_FDA from yymf_discover_company")
+	set_company = MysqlUtils.sql_to_set("select standard_name_en,full_name_en from yymf_discover_company")
 	global dict_dict
 	dict_dict = dict()
 	for name in set_company:
@@ -118,8 +88,8 @@ def writedict():
 
 
 def matchfrommongodb():
-	MongodbUtils.getcollection("prnewswire")
-	getlist = MongodbUtils.getlist(None)
+	MongodbUtils.set_collection("prnewswire")
+	getlist = MongodbUtils.get_list()
 	total = 0
 	i = 0
 	set_right = set()
@@ -185,7 +155,7 @@ def matchfromcsv2():
 		total = 0
 		i = 0
 		set_right = set()
-		nomatch = list()
+		nomatch = []
 		with open(os.path.join("..", "sources", name + ".csv"), encoding="utf-8") as csv_file:
 			# 读取csv文件
 			# csvrows=csv.reader(csv_file)

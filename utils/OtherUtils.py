@@ -32,6 +32,22 @@ tokenizer_english = "tokenizers/punkt/english.pickle"
 # english_stopwords = set(stopwords)
 english_stopwords = set(stopwords.words("english"))
 
+# 中文正则表达式
+pattern_wkz_zh = re.compile("[\u4E00-\u9FD5]+")
+# 英文正则表达式
+pattern_wkz_eng = re.compile("[a-zA-Z0-9\u0370-\u03ff]+")
+# 特殊字符
+special_chars = '[’!"#$%&\'()*+,-./:;<=>?@，。?★、．…【】《》（）？“”‘’！[\\]^_`{|}~]+'
+
+
+def get_target_path(file):
+	"""
+	根据文件名获取本项目target文件路径
+	:param file:文件名
+	:return:
+	"""
+	return os.path.join("..", "wkztarget", file)
+
 
 def review_to_wordlist(str: str, remove_stopwords=False):
 	"""
@@ -86,7 +102,7 @@ def get_sentences_data(train, tokenizer, remove_stopwords=False):
 	return sentences
 
 
-def save_fit_model(filename:str, model, defaultPath):
+def save_fit_model(filename:str, model):
 	"""
 	保存模型到默认目录(./wkztarget/)下指定文件
 	:param filename:保存的文件名
@@ -94,38 +110,28 @@ def save_fit_model(filename:str, model, defaultPath):
 	:param defaultPath:保存路径
 	:return:空
 	"""
-	if defaultPath:
-		path = os.path.join(defaultPath, filename)
-	else:
-		path = os.path.join(".", "wkztarget", filename)
+	path = get_target_path(filename)
 	with open(path, 'wb') as f:
 		pickle.dump(model, f)
 
 
-def load_fit_model(filename: str, defaultPath: str):
+def load_fit_model(filename: str):
 	"""
 	从默认目录(./wkztarget/)下指定文件载入模型
 	:param filename: 保存的文件名
 	:param defaultPath: 保存路径
 	:return: 模型对象
 	"""
-	if defaultPath:
-		path = os.path.join(defaultPath, filename)
-	else:
-		path = os.path.join(".", "wkztarget", filename)
+	path = get_target_path(filename)
 	return pickle.load(open(path, 'rb'))
 
 
-
-pattern_wkz_zh = re.compile("[\u4E00-\u9FD5]+")
-pattern_wkz_eng = re.compile("[a-zA-Z0-9\u0370-\u03ff]+")
 def contain_zh(word):
 	"""
 	判断是否包含中文
 	:param word:
 	:return: True包含中文
 	"""
-	global pattern_wkz_zh
 	return pattern_wkz_zh.search(word)
 
 def contain_eng(word):

@@ -4,18 +4,28 @@
 from pymongo import MongoClient
 
 # 连接对象
-connection = MongoClient("192.168.1.136", 27017)
+_connection = MongoClient("192.168.1.136", 27017)
 # 数据库
-db = connection["spider"]
+_db = _connection["spider"]
 # 表
-collection = None
+_collection = None
 
 
-def getcollection(collectionname: str):
-	global collection
-	collection = db[collectionname]
-	return collection
+def set_connection(host,port):
+	global _connection
+	_connection=MongoClient(host, port)
 
+def set_connection(dbname: str):
+	global _db
+	_db = _connection[dbname]
+
+def set_collection(collectionname: str):
+	global _collection
+	_collection = _db[collectionname]
+	return _collection
+
+def get_collection():
+	return _collection
 
 def insert(value):
 	"""
@@ -24,7 +34,7 @@ def insert(value):
 	:return:
 	"""
 	# user = {"name": "cui", "age": "10"}
-	collection.insert(value)
+	_collection.insert(value)
 
 
 def insertbulk(value):
@@ -34,10 +44,10 @@ def insertbulk(value):
 	:return:
 	"""
 	# users = [{"name": "cui", "age": "9"}, {"name": "cui", "age": "11"}]
-	collection.insert(value)
+	_collection.insert(value)
 
 
-def getone(search):
+def getone(search=None):
 	"""
 	查询单条记录
 	:param search:查询参数(参数是dict类型),为空则查询第一条
@@ -45,11 +55,11 @@ def getone(search):
 	"""
 	if search:
 		# return collection.find({"name": "1"})
-		return collection.find_one(search)
-	return collection.find_one()
+		return _collection.find_one(search)
+	return _collection.find_one()
 
 
-def getlist(search):
+def get_list(search=None):
 	"""
 	查询所有记录
 	:param search: 查询参数(参数是dict类型),为空则查询全部
@@ -57,19 +67,19 @@ def getlist(search):
 	"""
 	if search:
 		# return collection.find({"name": "1"})
-		return collection.find(search)
-	return collection.find()
+		return _collection.find(search)
+	return _collection.find()
 
 
-def getcount(search):
+def getcount(search=None):
 	"""
 	查询表中数据条数
 	:param search: 查询参数(参数是dict类型),为空则查询全部
 	:return:
 	"""
 	if search:
-		return collection.count(search)
-	return collection.count()
+		return _collection.count(search)
+	return _collection.count()
 
 
 # 高级查询

@@ -17,39 +17,6 @@ from utils import OtherUtils, MysqlUtils
 app = Flask(__name__)
 
 
-def addtag(set: set, value):
-	"""
-	将值转化为str并添加到set集合中
-	:param set: set集合
-	:param value: 值
-	:return: 空
-	"""
-	if value is not None:
-		if type(value) is str:
-			value = value.strip()
-			if value:
-				value = value.lower().replace("\n", "")
-				set.add(value)
-		else:
-			set.add(str(value).strip())
-
-
-def rowstoset(rows: tuple):
-	myset = set()
-	for row in rows:
-		if isinstance(row, tuple):
-			for value in row:
-				addtag(myset, value)
-		else:
-			addtag(myset, row)
-	return myset
-
-
-def sqltoset(sql: str):
-	rows = MysqlUtils.getrows(sql)
-	return rowstoset(rows)
-
-
 # 从mysql获取到关键字存储到文件中的路径
 createdict_all = os.path.join("..", "sources", "createdict_all")
 createdict_target = os.path.join("..", "sources", "createdict_target")
@@ -92,19 +59,19 @@ def writefile(path: str, set: set):
 		f.write(tagList[length] + freqandtag)
 
 
-def writetags():
+def writedict():
 	global set_target
 	global set_company
 	global set_indication
 	global set_drug
 	global set_all
-	set_target = sqltoset(
+	set_target = MysqlUtils.sql_to_set(
 		"select abbreviation,standard_name,name_cn,full_name,alternative_name from yymf_discover_target")
-	set_company = sqltoset(
+	set_company = MysqlUtils.sql_to_set(
 		"select standard_name_en,standard_name_cn,full_name_en,full_name_cn,alternative_name,name_FDA from yymf_discover_company")
-	set_indication = sqltoset("select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
-	set_drug = sqltoset(
-		"select standard_name,simplified_standard_name,bridging_name,active_ingredient_cn,active_ingredient_en,alternative_active_ingredient_name,inn_cn,inn_en,alternative_inn,trade_name_en,trade_name_cn,generic_brand,investigational_code,declaration_cn from yymf_discover_drugs_name_dic")
+	set_indication = MysqlUtils.sql_to_set("select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
+	set_drug = MysqlUtils.sql_to_set(
+		"select code,standard_name,simplified_standard_name,bridging_name,active_ingredient_cn,active_ingredient_en,alternative_active_ingredient_name,inn_cn,inn_en,alternative_inn,trade_name_en,trade_name_cn,generic_brand,investigational_code,declaration_cn from yymf_discover_drugs_name_dic")
 	# 合集
 	# set_all=set_target.union(set_company).union(set_indication).union(set_drug)
 	set_all = set_target | set_company | set_indication | set_drug
@@ -255,7 +222,7 @@ def keywordsdrug():
 
 if __name__ == '__main__':
 	# 从数据库读取关键字并存储到文件中
-	writetags()
+	writedict()
 
 	# 自定义分词器
 	# /tmp/jieba.u7eb91ea902d04d0df9cb8780d09ea208.cache
