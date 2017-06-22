@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
@@ -12,7 +12,7 @@ host = "192.168.1.136"
 port = 3306
 user = "root"
 passwd = "hblc123"
-_db = "base"
+_db = "base_new"
 
 
 def getrowswithfull(host: str, port: int, user: str, passwd: str, db: str, sql: str):
@@ -97,20 +97,24 @@ def _rows_to_set(rows: tuple, islower=True):
 
 
 def _add_tag_dict(mydict: dict, key, value, islower=True):
-	if key is not None:
-		if type(key) is str:
-			key = key.strip()
-			if key:
-				if islower:
-					key = key.lower().replace("\n", "")
-				else:
-					key = key.replace("\n", "")
-		else:
-			if islower:
-				key = str(key).strip().lower()
-			else:
-				key = str(key).strip()
+	if key and value:
+		# 对key进行去前後空格和换行
+		if not type(key) is str:
+			key=str(key)
+		key=key.strip()
 		if key:
+			key=key.replace("\n","").strip()
+		# 对value进行去前後空格和换行
+		if not isinstance(value,str):
+			value=str(value)
+		value=value.strip()
+		if value:
+			# 只对value进行小写转化,这个value最後会作为key
+			if islower:
+				value=value.lower().replace("\n","").strip()
+			else:
+				value=value.replace("\n","").strip()
+		if key and value:
 			CollectionUtils.add_dict_setvalue_single(mydict, key, value)
 
 
@@ -119,7 +123,8 @@ def _rows_to_dict(rows: tuple, islower=True):
 	for row in rows:
 		if isinstance(row, tuple):
 			for index in range(1, len(row)):
-				_add_tag_dict(mydict, row[index], row[0], islower)
+				if row[index]:
+					_add_tag_dict(mydict, row[0], row[index], islower)
 	return mydict
 
 
@@ -139,7 +144,7 @@ def sql_to_dict(sql: str, islower=True):
 	将sql查询结果转化为dict集合,用于生成字典
 	:param sql:sql语句
 	:param islower: 是否转化为小写,默认转化为小写
-	:return:String类型的set集合
+	:return:以第一列为key,set为value的dict
 	"""
 	rows = getrows(sql)
 	return _rows_to_dict(rows, islower)

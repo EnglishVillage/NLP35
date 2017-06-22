@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
 from pymongo import MongoClient
@@ -62,7 +62,9 @@ def getone(search=None):
 def get_list(search=None):
 	"""
 	查询所有记录
-	:param search: 查询参数(参数是dict类型),为空则查询全部
+	:param search: 查询参数(参数是dict类型),为空则查询全部,
+	{"_id":ObjectId("5916c3243c95966d4b201b5c")}
+	{"currentTime":{"$gt":1494664001430}}
 	:return:
 	"""
 	if search:

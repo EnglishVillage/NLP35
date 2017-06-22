@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
@@ -7,11 +7,7 @@ from operator import itemgetter
 import Levenshtein
 import pandas as pd
 import csv
-from utils import OtherUtils, MysqlUtils, MongodbUtils
-
-
-
-
+from utils import OtherUtils, MysqlUtils, MongodbUtils,RegexUtils
 
 stopwords = ["corp.,ltd.", "s.a.r.l.", "co.,ltd.", "s.p.a.", "s.a.s", "corp.", "inc.", "b.v.", "n.v.", "co.,", "pty.",
 			 "pte.", "a/s", "co."]
@@ -29,6 +25,7 @@ path_error = os.path.join("..", "wkztarget", "error.txt")
 dict_dict = None
 
 
+
 def preDeal(data: str):
 	"""
 	预处理数据
@@ -39,7 +36,7 @@ def preDeal(data: str):
 	data = data.lstrip()
 	words = data.split()
 	# 去除含有特殊字符的停止词,并去除特殊字符
-	words = [re.sub(OtherUtils.special_chars, "", w) for w in words if not w in stopwords]
+	words = [re.sub(RegexUtils.special_chars, "", w) for w in words if not w in stopwords]
 	# 去除通用公司名称
 	words = [w for w in words if not w in stopwords2]
 	# 用空格连接词组

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 import os, sys
 from functools import cmp_to_key
@@ -9,6 +9,9 @@ from operator import itemgetter, attrgetter
 import re
 from flask import Flask, jsonify, abort, make_response, request
 from bs4 import BeautifulSoup
+
+
+"打标签"
 
 # 导入自定义的包
 sys.path.append(os.path.join("..", "utils"))

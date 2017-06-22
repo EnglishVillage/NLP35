@@ -1,13 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
 from sklearn.feature_extraction.text import TfidfVectorizer as TFIDF
-from utils import OtherUtils
+
+from utils import OtherUtils,IOUtils
 
 
 def get_transform_data(model_name, data):
-	tmpfile = OtherUtils.get_target_path(model_name)
+	tmpfile = IOUtils.get_path_target(model_name)
 	# 判断文件是否存在
 	if os.path.exists(tmpfile):
 		tfidf = OtherUtils.load_fit_model(model_name)

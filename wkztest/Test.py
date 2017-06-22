@@ -1,11 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
 
-import os, sys, re, time
+import os, sys, re, time,math
+import operator
+from operator import itemgetter
+
 import pandas as pd
 import numpy as np
 from collections import OrderedDict, MutableSet
+
+from functools import reduce
 from bs4 import BeautifulSoup
 from sklearn.naive_bayes import MultinomialNB as MNB
 from sklearn.cross_validation import cross_val_score
@@ -17,6 +22,7 @@ from nltk.corpus import stopwords
 import pickle
 import csv
 import Levenshtein
+import pypinyin
 from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB as GNB
 from sklearn.ensemble import RandomForestClassifier
@@ -27,31 +33,50 @@ except ImportError:
 	import simplejson as json  # python <= 2.5
 
 # 导入自定义的包
-sys.path.append(os.path.join(".", "utils"))
-from utils import OtherUtils, MysqlUtils, TableUtils
+# sys.path.append(os.path.join(".", "utils"))
+from utils import OtherUtils, MysqlUtils, MongodbUtils, IOUtils, CollectionUtils, RegexUtils
 
-# s=re.sub("(.+)","","吸附手足口病(ev71型、ca16型)双价灭活疫苗(vero细胞)")
-# # s=re.findall("(.+?)","吸附手足口病(ev71型、ca16型)双价灭活疫苗(vero细胞)")
-# print(s)
+myset = {"普利", "地平", "哌唑"}
+mytuple = ("aa", myset)
+myls = ["普利", "地平", "哌唑", "列汀", "列酮", "那非", "特罗", "溴铵", "单抗", "西普", "夫定", "膦酸", "膦酸钠", "西林", "霉素", "沙班", "西坦", "司特",
+		"沙坦", "洛韦", "培南", "泊帕", "那肽", "他汀", "替尼", "噻嗪", "溴索", "特罗", "格雷", "福韦"]
+mydict = {"a": {1, 2}, "b": 2, "c": 3}
+mydict2 = {"a": {3, 4}, "bb": 2, "cc": 2}
+mydict3 = {"aa": {3, 4}, "bb": 3, "cc": 3}
+keys = mydict.keys()
+ls = list(keys)
 
-# url = 'https://113.215.20.136:9011/113.215.6.77/c3pr90ntcya0/youku/6981496DC9913B8321BFE4A4E73/0300010E0C51F10D86F80703BAF2B1ADC67C80-E0F6-4FF8-B570-7DC5603F9F40.flv'
-# pattern = 'http://(.*?):9011/'
-# out = re.sub(pattern, 'http://127.0.0.1:9091/', url)
-# print(out)
-# ('maposhangfengmianyiqiudanbai2', {"马破伤风免疫球蛋白(F(ab')2)"})
-# ('mpsfmyqdb2', {"马破伤风免疫球蛋白(F(ab')2)"})
-# ('马破伤风免疫球蛋白2', {"马破伤风免疫球蛋白(F(ab')2)"})
-# aa = (["氟伏沙明", "洛索洛芬", "磷酸"], 0.9155555555555556, 0, 0)
-# if len(aa[0])>1:
-# 	for v in aa[0]:
-# 		print((v,aa[1],aa[2],aa[3]))
-# else:
-# 	print((aa[0],aa[1],aa[2],aa[3]))
+#"a": {1, 2}, "b": 2, "c": 3,"bb": 2,"cc": 2,"aa": {3, 4},
 
-OrderedDict()
+print(set(mydict.keys()))
 
-fuzzy_set={"c","s","z","f","l","r","an","en","in","ian","uan"}
+myls.extend("".split())
+print(myls)
 
-fuzzy_set.add(1)
-print(fuzzy_set)
 
+# myls.append(map(float,"230.1,23.2,12.4".split(",")))
+# print(myls)
+# print(math.ceil(3/2))
+
+
+# for s in ls:
+# 	newstr1 = pypinyin.slug(s, separator="")
+# 	newstr = pypinyin.slug(s, separator="", style=pypinyin.FIRST_LETTER)
+# 	print(s+":"+newstr1+":"+newstr)
+
+# print(IOUtils.get_path_sources_absolute("产品规格.mdb"))
+
+
+
+# myset=set()
+# for m in totalnomatch:
+# 	myset.add(m[0])
+
+
+# ls = line.split("', {'")
+# try:
+# 	aa=set(ls[1].split("', '"))
+# except:
+# 	ls = line.lstrip("('").rstrip("\"})\n").split("', {\"")
+# 	aa=set(ls[1].split("\", \""))
+# print(1)

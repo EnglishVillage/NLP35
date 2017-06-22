@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
-import os,sys,re
+import os, sys, re, time
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
-# import time
+
 # import pandas as pd
 # import numpy as np
 # from sklearn.feature_extraction.text import TfidfVectorizer as TFIDF
@@ -17,12 +17,14 @@ from nltk.corpus import stopwords
 # from gensim.models import Word2Vec
 # from sklearn.naive_bayes import GaussianNB as GNB
 # from sklearn.ensemble import RandomForestClassifier
-try:
-   import cPickle as pickle   # 序列化
-except ImportError:
-   import pickle
+from utils import IOUtils
 
-#将本文件路径告诉环境
+try:
+	import cPickle as pickle  # 序列化
+except ImportError:
+	import pickle
+
+# 将本文件路径告诉环境
 # sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
 
 tokenizer_english = "tokenizers/punkt/english.pickle"
@@ -31,22 +33,6 @@ tokenizer_english = "tokenizers/punkt/english.pickle"
 # stopwords = [line.rstrip() for line in open("./stopwords.txt")]
 # english_stopwords = set(stopwords)
 english_stopwords = set(stopwords.words("english"))
-
-# 中文正则表达式
-pattern_wkz_zh = re.compile("[\u4E00-\u9FD5]+")
-# 英文正则表达式
-pattern_wkz_eng = re.compile("[a-zA-Z0-9\u0370-\u03ff]+")
-# 特殊字符
-special_chars = '[’!"#$%&\'()*+,-./:;<=>?@，。?★、．…【】《》（）？“”‘’！[\\]^_`{|}~]+'
-
-
-def get_target_path(file):
-	"""
-	根据文件名获取本项目target文件路径
-	:param file:文件名
-	:return:
-	"""
-	return os.path.join("..", "wkztarget", file)
 
 
 def review_to_wordlist(str: str, remove_stopwords=False):
@@ -102,7 +88,7 @@ def get_sentences_data(train, tokenizer, remove_stopwords=False):
 	return sentences
 
 
-def save_fit_model(filename:str, model):
+def save_fit_model(filename: str, model):
 	"""
 	保存模型到默认目录(./wkztarget/)下指定文件
 	:param filename:保存的文件名
@@ -110,7 +96,7 @@ def save_fit_model(filename:str, model):
 	:param defaultPath:保存路径
 	:return:空
 	"""
-	path = get_target_path(filename)
+	path = IOUtils.get_path_target(filename)
 	with open(path, 'wb') as f:
 		pickle.dump(model, f)
 
@@ -122,22 +108,5 @@ def load_fit_model(filename: str):
 	:param defaultPath: 保存路径
 	:return: 模型对象
 	"""
-	path = get_target_path(filename)
+	path = IOUtils.get_path_target(filename)
 	return pickle.load(open(path, 'rb'))
-
-
-def contain_zh(word):
-	"""
-	判断是否包含中文
-	:param word:
-	:return: True包含中文
-	"""
-	return pattern_wkz_zh.search(word)
-
-def contain_eng(word):
-	"""
-	匹配是否含有大小写字母,数字,希腊字母
-	:param word:
-	:return:
-	"""
-	return pattern_wkz_eng.search(word)
