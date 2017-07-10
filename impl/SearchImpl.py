@@ -31,12 +31,13 @@ show_num = 5
 py_fuzzy_dict = {"c": "ch", "s": "sh", "z": "zh", "l": "n", "f": "h", "r": "l", "an": "ang", "en": "eng", "in": "ing", "ian": "iang", "uan": "uang", "ch": "c", "sh": "s", "zh": "z", "n": "l", "h": "f", "l": "r", "ang": "an", "eng": "en", "ing": "in", "iang": "ian", "uang": "uan"}
 py_fuzzy_set = {"c", "s", "z", "f", "l", "r", "an", "en", "in", "ian", "uan"}
 sql_discover_drugs = "select standard_name,standard_name,simplified_standard_name,inn_en,trade_name_en,investigational_code,declaration_cn from yymf_discover_drugs_name_dic "
-sql_database_drugs = "select standard_name,alternative_inn,alternative_active_ingredient_name,alternative_name from yymf_drugs_name_dic "
+sql_database_drugs = "select standard_name,alternative_inn,alternative_active_ingredient_name,alternative_name from yymf_drugs_name_dic where is_delete!=1 "
+
 # sql = "select standard_name,alternative_inn,alternative_active_ingredient_name,alternative_name from yymf_drugs_name_dic "
 # sql_discover_drugs += "where standard_name in ('中/长链脂肪乳C6-24')"
 # sql_discover_drugs += "where standard_name like '%阿莫西林%'"
 # sql_database_drugs+="where standard_name in ('卫生散')"
-# sql_database_drugs += "where standard_name like '%阿莫西林%'"
+# sql_database_drugs += "where standard_name like '%消渴平%'"
 jieba_dict_path = None
 
 
@@ -57,10 +58,10 @@ def search():
 	if len(request.values) < 1:
 		abort(400)
 	text = request.values["text"]
+	showdetails=False
 	if "showdetails" in request.values:
-		result = search_debug_details(text)
-	else:
-		result = search_debug_details(text, False)
+		showdetails = True
+	result = search_debug_details(text, showdetails)
 	return jsonify({'match': result}), 200
 
 
@@ -114,9 +115,18 @@ def preDeal(mydict, isfuzzymatch=True, isdiscover=True):
 							CollectionUtils.add_dict_setvalue_single(activedict, keychichi, value)
 						else:
 							CollectionUtils.add_dict_setvalue_single(dict_dict, keychichi, value)
+	# 对活性成份列表进行判断
 	for key in activedict:
+		# 判断活性成份作为key是否已经存在
 		if key in dict_dict:
 			CollectionUtils.add_dict_setvalue_multi(dict_dict, key, activedict[key])
+		else:
+			# 判断活性成份是否为value的一部分
+			vals=activedict[key]
+			for val in vals:
+				if key in val.lower():
+					CollectionUtils.add_dict_setvalue_multi(dict_dict, key, activedict[key])
+					break
 	print("pre deal over!")
 
 
@@ -128,13 +138,13 @@ def split_dict(isfuzzymatch):
 		if key.isdigit() or keylen > 30:
 			continue
 		elif RegexUtils.contain_zh(key):
-			if keylen < 15 and keylen > 1:
+			if keylen < 21 and keylen > 1:
 				valueset = dict_dict[key]
 				if isfuzzymatch:
 					dict_zh[key] = valueset
 					new_dict[key] = valueset
 				else:
-					if keylen < 5:
+					if keylen < 3:
 						for value in valueset:
 							if key == value:
 								dict_zh[key] = valueset
@@ -142,6 +152,9 @@ def split_dict(isfuzzymatch):
 					else:
 						dict_zh[key] = valueset
 						new_dict[key] = valueset
+				# valueset = dict_dict[key]
+				# dict_zh[key] = valueset
+				# new_dict[key] = valueset
 		elif keylen > 1:
 			dict_en[key] = dict_dict[key]
 			new_dict[key] = dict_dict[key]
@@ -152,20 +165,27 @@ def read_cache(path, mydict):
 	with open(path, "r", encoding="utf-8") as f:
 		for line in f.readlines():
 			if line:
-				# if "阿莫西林'" in line:
-				# 	print(line)
-				# line = line.lstrip("('").rstrip("'})\n")
-				line = line[2:-4]
-				ls = line.split("', {'")
+				newline = line[2:-4]
+				ls = newline.split("', {'")
 				try:
 					mydict[ls[0]] = set(ls[1].split("', '"))
 				except:
-					ls = line.lstrip("('").rstrip("\"})\n").split("', {\"")
-					mydict[ls[0]] = set(ls[1].split("\", \""))
+					ls=newline.split(", {")
+					key = ls[0][:-1]
+					setvals=set()
+					vals = ls[1].split(", ")
+					length=len(vals)
+					for i in range(length):
+						if i<length-1:
+							setvals.add(vals[i][1:-1])
+						else:
+							setvals.add(vals[i][1:])
+					mydict[key] = setvals
 
 
 def remove_multi_drug(zhlist):
 	newlist = []
+	# mulset用来记录最短的key
 	mulset = set()
 	for t in zhlist:
 		flag = True
@@ -179,9 +199,13 @@ def remove_multi_drug(zhlist):
 	return newlist
 
 
-def load_exclude():
-	IOUtils.my_read(IOUtils.get_path_sources("chinacity.txt"), exclude_set)
-	IOUtils.my_read(IOUtils.get_path_sources("exclude_drug.txt"), exclude_set)
+def load_exclude(myset):
+	IOUtils.my_read(IOUtils.get_path_sources("chinacity.txt"), myset)
+	IOUtils.my_read(IOUtils.get_path_sources("exclude_drug.txt"), myset)
+	if "" in myset:
+		myset.remove("")
+	if None in myset:
+		myset.remove(None)
 
 
 def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0):
@@ -193,7 +217,7 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	:param returntype:0:中英文,1:中文,2:英文
 	:return:
 	"""
-	# 获取缓存文件路径名
+	# 获取字典缓存路径名和结巴字典缓存路径名
 	tempfile = ""
 	filename = "dict_drug"
 	jieba_filename = "jieba_drug"
@@ -209,7 +233,7 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	path_en = IOUtils.get_path_target(filename + tempfile + "_en.txt")
 	global jieba_dict_path
 	jieba_dict_path = IOUtils.get_path_target(jieba_filename + tempfile + ".txt")
-
+	# 判断缓存文件是否存在
 	isexist = os.path.exists(path_zh)
 	if readcache and isexist:
 		read_cache(path_zh, dict_zh)
@@ -224,8 +248,7 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	else:
 		# 精确匹配,则加载排除字典
 		if not isfuzzymatch:
-			load_exclude()
-
+			load_exclude(exclude_set)
 		if isdiscover:
 			mydict = MysqlUtils.sql_to_dict(sql_discover_drugs)
 		else:
@@ -235,6 +258,8 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 
 		zhlist = list(dict_zh.items())
 		enlist = list(dict_en.items())
+
+		# 模糊匹配,去除多余的key
 		if isfuzzymatch:
 			# 这里先升序
 			zhlist.sort(key=lambda t: len(t[0]), reverse=False)
@@ -627,7 +652,7 @@ def matchfrommongodb(tokenizer_all):
 
 
 if __name__ == '__main__':
-	writedict(isfuzzymatch=True, isdiscover=True, readcache=False)
+	writedict(isfuzzymatch=True, isdiscover=False, readcache=True, returntype=0)
 	loadfuzzydict()
 	# 本机只能通过127.0.0.1或者localhost可访问,其它机子只能通过192.168.2.135可以访问(默认是5000)
 	app.run(host='0.0.0.0', port=5000, debug=True)

@@ -22,13 +22,13 @@ tokenizer_all = None
 tokenizer_target = None
 tokenizer_company = None
 tokenizer_indication = None
-tokenizer_drug = None
+tokenizer_drug_database = None
 # 关键字集合
 set_all = None
 set_target = None
 set_company = None
 set_indication = None
-set_drug = None
+set_drug_database = None
 
 # 自定义的词库的词频和类型
 freqandtag = "@@3@@nz"
@@ -57,7 +57,7 @@ def writetags():
 	global set_target
 	global set_company
 	global set_indication
-	global set_drug
+	global set_drug_database
 	global set_all
 	set_target = MysqlUtils.sql_to_set(
 		"select abbreviation,standard_name,name_cn,full_name,alternative_name from yymf_discover_target")
@@ -204,7 +204,7 @@ def keywordsindication():
 # post请求
 @app.route('/python/api/keywords/drug', methods=['POST'])
 def keywordsdrug():
-	return keywords(tokenizer_drug)
+	return keywords(tokenizer_drug_database)
 
 
 if __name__ == '__main__':
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 	tokenizer_target = jieba.Tokenizer(createdict_target)
 	tokenizer_company = jieba.Tokenizer(createdict_company)
 	tokenizer_indication = jieba.Tokenizer(createdict_indication)
-	tokenizer_drug = jieba.Tokenizer(createdict_drug)
+	tokenizer_drug_database = jieba.Tokenizer(createdict_drug)
 
 	# 本机只能通过127.0.0.1或者localhost可访问,其它机子只能通过192.168.2.135可以访问(默认是5000)
 	app.run(host='0.0.0.0', port=5000, debug=True)
