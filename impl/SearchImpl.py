@@ -2,6 +2,8 @@
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 from collections import OrderedDict
 from operator import itemgetter
 
@@ -58,7 +60,7 @@ def search():
 	if len(request.values) < 1:
 		abort(400)
 	text = request.values["text"]
-	showdetails=False
+	showdetails = False
 	if "showdetails" in request.values:
 		showdetails = True
 	result = search_debug_details(text, showdetails)
@@ -122,7 +124,7 @@ def preDeal(mydict, isfuzzymatch=True, isdiscover=True):
 			CollectionUtils.add_dict_setvalue_multi(dict_dict, key, activedict[key])
 		else:
 			# 判断活性成份是否为value的一部分
-			vals=activedict[key]
+			vals = activedict[key]
 			for val in vals:
 				if key in val.lower():
 					CollectionUtils.add_dict_setvalue_multi(dict_dict, key, activedict[key])
@@ -152,9 +154,9 @@ def split_dict(isfuzzymatch):
 					else:
 						dict_zh[key] = valueset
 						new_dict[key] = valueset
-				# valueset = dict_dict[key]
-				# dict_zh[key] = valueset
-				# new_dict[key] = valueset
+					# valueset = dict_dict[key]
+					# dict_zh[key] = valueset
+					# new_dict[key] = valueset
 		elif keylen > 1:
 			dict_en[key] = dict_dict[key]
 			new_dict[key] = dict_dict[key]
@@ -170,13 +172,13 @@ def read_cache(path, mydict):
 				try:
 					mydict[ls[0]] = set(ls[1].split("', '"))
 				except:
-					ls=newline.split(", {")
+					ls = newline.split(", {")
 					key = ls[0][:-1]
-					setvals=set()
+					setvals = set()
 					vals = ls[1].split(", ")
-					length=len(vals)
+					length = len(vals)
 					for i in range(length):
-						if i<length-1:
+						if i < length - 1:
 							setvals.add(vals[i][1:-1])
 						else:
 							setvals.add(vals[i][1:])
@@ -199,13 +201,14 @@ def remove_multi_drug(zhlist):
 	return newlist
 
 
-def load_exclude(myset):
-	IOUtils.my_read(IOUtils.get_path_sources("chinacity.txt"), myset)
-	IOUtils.my_read(IOUtils.get_path_sources("exclude_drug.txt"), myset)
-	if "" in myset:
-		myset.remove("")
-	if None in myset:
-		myset.remove(None)
+def load_exclude(filenames, myset):
+	if filenames:
+		for name in filenames:
+			IOUtils.my_read(IOUtils.get_path_sources(name), myset)
+		if "" in myset:
+			myset.remove("")
+		if None in myset:
+			myset.remove(None)
 
 
 def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0):
@@ -248,7 +251,7 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	else:
 		# 精确匹配,则加载排除字典
 		if not isfuzzymatch:
-			load_exclude(exclude_set)
+			load_exclude(("chinacity.txt", "exclude_drug.txt"), exclude_set)
 		if isdiscover:
 			mydict = MysqlUtils.sql_to_dict(sql_discover_drugs)
 		else:

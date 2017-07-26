@@ -2,6 +2,8 @@
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 # from __future__ import print_function
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
@@ -74,7 +76,7 @@ def out():
 	'''在最优参数下输出聚类结果'''
 	dataset = TableUtils.read_xlsx(file=os.path.join("..", "sources", "NCT Drug（待匹配）.xlsx"), colindexes=(1,),
 								   istitle=True)
-	dataset=[row[0] for row in dataset if row and row[0]]
+	dataset = [row[0] for row in dataset if row and row[0]]
 	X, vectorizer = transform(dataset, n_features=500)
 	score = train(X, vectorizer, true_k=10, showLable=True) / len(dataset)
 	print(score)

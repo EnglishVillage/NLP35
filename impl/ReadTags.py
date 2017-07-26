@@ -1,24 +1,24 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
-import os, sys
-from functools import cmp_to_key
-import jieba
-import jieba.posseg as pseg
-import time
-from operator import itemgetter, attrgetter
-import re
-from flask import Flask, jsonify, abort, make_response, request
-from bs4 import BeautifulSoup
 
 
 "打标签"
 
-# 导入自定义的包
-sys.path.append(os.path.join("..", "utils"))
+import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
+from functools import cmp_to_key
+import jieba
+import jieba.posseg as pseg
+
+from operator import itemgetter, attrgetter
+
+from flask import Flask, jsonify, abort, make_response, request
+from bs4 import BeautifulSoup
+
 from utils import OtherUtils, MysqlUtils
 
 app = Flask(__name__)
-
 
 # 从mysql获取到关键字存储到文件中的路径
 createdict_all = os.path.join("..", "sources", "createdict_all")
@@ -72,7 +72,8 @@ def writedict():
 		"select abbreviation,standard_name,name_cn,full_name,alternative_name from yymf_discover_target")
 	set_company = MysqlUtils.sql_to_set(
 		"select standard_name_en,standard_name_cn,full_name_en,full_name_cn,alternative_name,name_FDA from yymf_discover_company")
-	set_indication = MysqlUtils.sql_to_set("select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
+	set_indication = MysqlUtils.sql_to_set(
+		"select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
 	set_drug = MysqlUtils.sql_to_set(
 		"select code,standard_name,simplified_standard_name,bridging_name,active_ingredient_cn,active_ingredient_en,alternative_active_ingredient_name,inn_cn,inn_en,alternative_inn,trade_name_en,trade_name_cn,generic_brand,investigational_code,declaration_cn from yymf_discover_drugs_name_dic")
 	# 合集

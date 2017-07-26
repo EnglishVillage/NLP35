@@ -12,10 +12,12 @@ kaggle:https://www.kaggle.com/c/word2vec-nlp-tutorial/data
 参考:http://www.cnblogs.com/lijingpeng/p/5787549.html
 """
 
-import os,sys
+import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 import pandas as pd
 import numpy as np
-import re
+
 from bs4 import BeautifulSoup
 from sklearn.feature_extraction.text import TfidfVectorizer as TFIDF
 from sklearn.naive_bayes import MultinomialNB as MNB
@@ -25,32 +27,25 @@ from sklearn.grid_search import GridSearchCV
 import gensim
 import nltk
 from nltk.corpus import stopwords
-import time
 from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB as GNB
 from sklearn.ensemble import RandomForestClassifier
+
 try:
 	import json  # python >= 2.6
 except ImportError:
 	import simplejson as json  # python <= 2.5
 
-# 导入自定义的包
-sys.path.append(os.path.join("..", "utils"))
 from utils import OtherUtils
-
-
-
-
 
 # 载入数据集
 train = pd.read_csv(os.path.join(".", "sources", "labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
-test = pd.read_csv(os.path.join(".", "sources","testData.tsv"), header=0, delimiter="\t", quoting=3)
+test = pd.read_csv(os.path.join(".", "sources", "testData.tsv"), header=0, delimiter="\t", quoting=3)
 
 label = train['sentiment']
 
 train_data = OtherUtils.get_deal_data(train["review"])
 test_data = OtherUtils.get_deal_data(test["review"])
-
 
 # # Word2vec
 # 神经网络语言模型L = SUM[log(p(w|contect(w))]，即在w的上下文下计算当前词w的概率，
@@ -80,6 +75,7 @@ model_name = os.path.join(".", "wkztarget", "300features_40minwords_10context_Tr
 
 # 从已经训练好的模型中加载使用
 model = gensim.models.Word2Vec.load(model_name)
+
 
 # # 预览模型
 # print(model.doesnt_match("man woman child kitchen".split()))
@@ -134,7 +130,6 @@ testDataVecs = getAvgFeatureVecs(test_data, model, num_features)
 print(trainDataVecs)
 print(testDataVecs)
 
-
 # 高斯贝叶斯+Word2vec训练
 model_GNB = GNB()
 model_GNB.fit(trainDataVecs, label)
@@ -149,8 +144,7 @@ output.to_csv("gnb_word2vec.csv", index=False, quoting=3)
 # 随机森林+Word2vec训练
 forest = RandomForestClassifier(n_estimators=100, n_jobs=2)
 print("Fitting a random forest to labeled training data...")
-forest.fit(trainDataVecs, label)#这里返回的是同一个对象
-
+forest.fit(trainDataVecs, label)  # 这里返回的是同一个对象
 
 print("随机森林分类器10折交叉验证得分: ", np.mean(cross_val_score(forest, trainDataVecs, label, cv=10, scoring='roc_auc')))
 # 测试集
@@ -158,7 +152,3 @@ result = forest.predict(testDataVecs)
 output = pd.DataFrame(data={"id": test["id"], "sentiment": result})
 output.to_csv("rf_word2vec.csv", index=False, quoting=3)
 # 改用随机森林之后，效果有提升，但是依然没有超过基于TF-IDF多项式贝叶斯模型
-
-
-
-

@@ -13,10 +13,11 @@ def _read_xlsx_data(booksheet, rowindexes, colindexes):
 		for colindex in colindexes:
 			cel = booksheet.cell(rowindex, colindex)
 			val = cel.value
-			if type(val) == str:
-				val = val.lstrip()
-			else:
-				val = str(val).lstrip()
+			if val:
+				if type(val) == str:
+					val = val.lstrip()
+				else:
+					val = str(val).lstrip()
 			row_data.append(val)
 		rows.append(row_data)
 	return rows
@@ -26,7 +27,7 @@ def read_xlsx(file, colindexes="*", istitle=False):
 	"""
 	读取xlsx文件
 	:param file:文件路径
-	:param colindex:colindexes默认读取全部列,设置集合[0,3]可以读取指定列
+	:param colindex:colindexes默认读取全部列,设置集合[0,3]可以读取第1,4列
 	:param sheet:sheet名称
 	:param istitle:是否包含标题
 	:return:返回list

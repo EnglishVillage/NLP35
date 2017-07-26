@@ -1,8 +1,9 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import os,sys
-import re
+import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 import numpy as np
 import pandas as pd
 # 解析网页
@@ -19,23 +20,19 @@ from nltk.corpus import stopwords
 import pickle
 
 # 导入自定义的包
-# sys.path.append(os.path.join("..", "utils"))
 from utils import OtherUtils
-
 
 # from sklearn.naive_bayes import MultinomialNB as MNB
 # from sklearn.cross_validation import cross_val_score
 # from sklearn.linear_model import LogisticRegression as LR
 # from sklearn.grid_search import GridSearchCV
 # import gensim
-# import time
 # from gensim.models import Word2Vec
 # from sklearn.naive_bayes import GaussianNB as GNB
 
 print("start")
 
-
-datafile = os.path.join("..","sources", "labeledTrainData.tsv")
+datafile = os.path.join("..", "sources", "labeledTrainData.tsv")
 # df = pd.read_csv(datafile, header=0, delimiter="\t", quoting=3)
 df = pd.read_csv(datafile, sep="\t", escapechar="\\")
 # print(datafile)	#.\labeledTrainData.tsv
@@ -43,6 +40,8 @@ df = pd.read_csv(datafile, sep="\t", escapechar="\\")
 
 # print("Number of reviews:{}".format(len(df)))
 print(df.head())
+
+
 # print(df["review"][0])
 
 def display(text, title):
@@ -59,7 +58,7 @@ def display(text, title):
 # print(cleantext)
 
 # 对每一行使用清洗函数,并保存到新列中
-df["clean_review"]=df.review.apply(OtherUtils.review_to_wordlist)
+df["clean_review"] = df.review.apply(OtherUtils.review_to_wordlist)
 print(df.head())
 
 # 抽取bag of words特征(用sklearn的CountVectorizer)

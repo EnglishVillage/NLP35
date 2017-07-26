@@ -2,12 +2,14 @@
 # -*- coding:utf-8 -*-
 
 import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 from operator import itemgetter
 
 import Levenshtein
 import pandas as pd
 import csv
-from utils import OtherUtils, MysqlUtils, MongodbUtils,RegexUtils
+from utils import OtherUtils, MysqlUtils, MongodbUtils, RegexUtils
 
 stopwords = ["corp.,ltd.", "s.a.r.l.", "co.,ltd.", "s.p.a.", "s.a.s", "corp.", "inc.", "b.v.", "n.v.", "co.,", "pty.",
 			 "pte.", "a/s", "co."]
@@ -23,7 +25,6 @@ path_dict = os.path.join("..", "wkztarget", "company.txt")
 path_right = os.path.join("..", "wkztarget", "right.txt")
 path_error = os.path.join("..", "wkztarget", "error.txt")
 dict_dict = None
-
 
 
 def preDeal(data: str):
@@ -66,9 +67,9 @@ def writedict():
 		else:
 			dict_dict[deal] = set([name])
 
-	# with open(path_dict, "w", encoding="utf-8") as f:
-	# 	for name in dict_dict:
-	# 		f.write(name + "\n")
+		# with open(path_dict, "w", encoding="utf-8") as f:
+		# 	for name in dict_dict:
+		# 		f.write(name + "\n")
 
 
 # def readdict():
@@ -198,5 +199,5 @@ def matchfromcsv2():
 
 if __name__ == '__main__':
 	writedict()
-# readdict()
+	# readdict()
 	matchfromcsv2()

@@ -11,8 +11,9 @@ kaggle:https://www.kaggle.com/c/word2vec-nlp-tutorial/data
 参考:http://www.cnblogs.com/lijingpeng/p/5787549.html
 """
 
-
 import os, sys, re, time
+
+sys.path.append('/home/esuser/NLP35')
 import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
@@ -28,32 +29,26 @@ import pickle
 from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB as GNB
 from sklearn.ensemble import RandomForestClassifier
+
 try:
 	import json  # python >= 2.6
 except ImportError:
 	import simplejson as json  # python <= 2.5
 
-# 导入自定义的包
-sys.path.append(os.path.join("..", "utils"))
-
-from utils import TFIDFUtils,OtherUtils
-
-
-
+from utils import TFIDFUtils, OtherUtils
 
 # 载入数据集
 train = pd.read_csv(os.path.join("..", "sources", "labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
-test = pd.read_csv(os.path.join("..", "sources","testData.tsv"), header=0, delimiter="\t", quoting=3)
+test = pd.read_csv(os.path.join("..", "sources", "testData.tsv"), header=0, delimiter="\t", quoting=3)
 
 label = train['sentiment']
 
 train_data = OtherUtils.get_deal_data(train["review"])
 test_data = OtherUtils.get_deal_data(test["review"])
 
-
 # # 合并训练和测试集以便进行TFIDF向量化操作
 data_all = train_data + test_data
-tfidf,data_all =TFIDFUtils.get_transform_data("tfidf.pkl",data_all)
+tfidf, data_all = TFIDFUtils.get_transform_data("tfidf.pkl", data_all)
 # print(tfidf.get_feature_names()[:20])		#获取所有特征值
 # print(data_all[:20].toarray())			#获取特征值所对应的向量(该特征值不存在,在index处不存在用0表示)
 
@@ -70,8 +65,8 @@ train_x = data_all[:len_train]
 # # 保存模型
 # model_name="MNB.pkl"
 # OtherUtils.save_fit_model(model_name, model_NB)
-model_name="MNB.pkl"
-model_NB=OtherUtils.load_fit_model(model_name)
+model_name = "MNB.pkl"
+model_NB = OtherUtils.load_fit_model(model_name)
 
 MNB(alpha=1.0, class_prior=None, fit_prior=True)
 print("多项式贝叶斯分类器10折交叉验证得分: ", np.mean(cross_val_score(model_NB, train_x, label, cv=10, scoring='roc_auc')))
