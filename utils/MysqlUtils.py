@@ -3,9 +3,6 @@
 
 import os, sys, re, time
 import pymysql
-
-# 将本文件路径告诉环境
-# sys.path.append(os.path.normpath(os.path.join(os.getcwd(), __file__)))
 from utils import CollectionUtils
 
 host = "192.168.1.136"

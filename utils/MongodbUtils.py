@@ -11,21 +11,25 @@ _db = _connection["spider"]
 _collection = None
 
 
-def set_connection(host,port):
+def set_connection(host, port):
 	global _connection
-	_connection=MongoClient(host, port)
+	_connection = MongoClient(host, port)
+
 
 def set_connection(dbname: str):
 	global _db
 	_db = _connection[dbname]
+
 
 def set_collection(collectionname: str):
 	global _collection
 	_collection = _db[collectionname]
 	return _collection
 
+
 def get_collection():
 	return _collection
+
 
 def insert(value):
 	"""
@@ -61,10 +65,8 @@ def getone(search=None):
 
 def get_list(search=None):
 	"""
-	查询所有记录
-	:param search: 查询参数(参数是dict类型),为空则查询全部,
-	{"_id":ObjectId("5916c3243c95966d4b201b5c")}
-	{"currentTime":{"$gt":1494664001430}}
+	查询所有记录(遍历的时候,通过row["content"]获取字段的值,通过row["_id"]获取ID)
+	:param search: 查询参数(参数是dict类型),为空则查询全部,{"_id":ObjectId("5916c3243c95966d4b201b5c")}根据id查询,{"currentTime":{"$gt":1494664001430}}根据时间段查询
 	:return:
 	"""
 	if search:
@@ -82,7 +84,6 @@ def getcount(search=None):
 	if search:
 		return _collection.count(search)
 	return _collection.count()
-
 
 # 高级查询
 # collection.find({"age": {"$gt": "10"}}).sort("age"):
