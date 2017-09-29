@@ -36,11 +36,11 @@ try:
 except ImportError:
 	import simplejson as json  # python <= 2.5
 
-from utils import OtherUtils
+from utils import OtherUtils,IOUtils
 
 # 载入数据集
-train = pd.read_csv(os.path.join(".", "sources", "labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
-test = pd.read_csv(os.path.join(".", "sources", "testData.tsv"), header=0, delimiter="\t", quoting=3)
+train = pd.read_csv(IOUtils.get_path_sources("labeledTrainData.tsv"), header=0, delimiter="\t", quoting=3)
+test = pd.read_csv(IOUtils.get_path_sources("testData.tsv"), header=0, delimiter="\t", quoting=3)
 
 label = train['sentiment']
 
@@ -51,30 +51,30 @@ test_data = OtherUtils.get_deal_data(test["review"])
 # 神经网络语言模型L = SUM[log(p(w|contect(w))]，即在w的上下文下计算当前词w的概率，
 # 由公式可以看到，我们的核心是计算p(w|contect(w)， Word2vec给出了构造这个概率的一个方法。
 
-# tokenizer = nltk.data.load(OtherUtils.tokenizer_english)
-#
-# sentences = OtherUtils.get_sentences_data(train["review"],tokenizer)
-#
-# 构建word2vec模型
-# 模型参数
-num_features = 300  # Word vector dimensionality
-min_word_count = 40  # Minimum word count
-num_workers = 4  # Number of threads to run in parallel
-context = 10  # Context window size
-downsampling = 1e-3  # Downsample setting for frequent words
-# # 训练模型
-# print("训练模型中...")
-# model = Word2Vec(sentences, workers=num_workers, size=num_features, min_count=min_word_count, window=context,
-# 				 sample=downsampling)
-# # 保存模型
-# print('保存模型...')
-# model.init_sims(replace=True)
-model_name = os.path.join(".", "wkztarget", "300features_40minwords_10context_True")
-# model.save(model_name)
+readcache=False
+model_name = "300features_40minwords_10context_True"
+if readcache and IOUtils.exist_target(model_name):
+	# 从已经训练好的模型中加载使用
+	model = Word2Vec.load(model_name)
+else:
+	tokenizer = nltk.data.load(OtherUtils.tokenizer_english)
+	sentences = OtherUtils.get_sentences_data(train["review"],tokenizer)
+	# 构建word2vec模型
+	# 模型参数
+	num_features = 300  # Word vector dimensionality
+	min_word_count = 40  # Minimum word count
+	num_workers = 4  # Number of threads to run in parallel
+	context = 10  # Context window size
+	downsampling = 1e-3  # Downsample setting for frequent words
+	# 训练模型
+	model = Word2Vec(sentences, workers=num_workers, size=num_features, min_count=min_word_count, window=context,
+					 sample=downsampling)
+	# 保存模型
+	model.init_sims(replace=True)
+	model.save(model_name)
 
 
-# 从已经训练好的模型中加载使用
-model = gensim.models.Word2Vec.load(model_name)
+
 
 
 # # 预览模型

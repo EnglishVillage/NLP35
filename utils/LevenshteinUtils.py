@@ -57,3 +57,5 @@ length=Levenshtein.jaro_winkler('Dinsdale', 'D')  # doctest: +ELLIPSIS
 print(length)
 length=Levenshtein.jaro_winkler('pharma', 'pharmaceuticals', 0.12)
 print(length)
+length=Levenshtein.jaro_winkler('pharma', 'pharma', 0.12)
+print(length)

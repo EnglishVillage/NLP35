@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import nltk.data
 # nltk.download('punkt')
 from nltk.corpus import stopwords
-from gensim.models.word2vec import Word2Vec
+from gensim.models import Word2Vec
 # 随机森林
 from sklearn.ensemble import RandomForestClassifier
 # 评估矩阵

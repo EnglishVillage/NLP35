@@ -9,9 +9,11 @@ import jieba
 from flask import Flask, jsonify, abort, make_response, request
 from bs4 import BeautifulSoup
 
-from utils import OtherUtils, MysqlUtils
+from utils import OtherUtils
+from utils.Utils import MysqlUtils
 
 app = Flask(__name__)
+mysql_utils = MysqlUtils()
 
 # 从mysql获取到关键字存储到文件中的路径
 createdict_all = os.path.join("..", "sources", "createdict_all")
@@ -61,13 +63,13 @@ def writetags():
 	global set_indication
 	global set_drug_database
 	global set_all
-	set_target = MysqlUtils.sql_to_set(
+	set_target = mysql_utils.sql_to_set(
 		"select abbreviation,standard_name,name_cn,full_name,alternative_name from yymf_discover_target")
-	set_company = MysqlUtils.sql_to_set(
+	set_company = mysql_utils.sql_to_set(
 		"select standard_name_en,standard_name_cn,full_name_en,full_name_cn,alternative_name,name_FDA from yymf_discover_company")
-	set_indication = MysqlUtils.sql_to_set(
+	set_indication = mysql_utils.sql_to_set(
 		"select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
-	set_drug = MysqlUtils.sql_to_set(
+	set_drug = mysql_utils.sql_to_set(
 		"select standard_name,simplified_standard_name,bridging_name,active_ingredient_cn,active_ingredient_en,alternative_active_ingredient_name,inn_cn,inn_en,alternative_inn,trade_name_en,trade_name_cn,generic_brand,investigational_code,declaration_cn from yymf_discover_drugs_name_dic")
 	# 合集
 	# set_all=set_target.union(set_company).union(set_indication).union(set_drug)

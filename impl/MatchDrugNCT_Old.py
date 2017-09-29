@@ -1,7 +1,14 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
+"""
+静姐	NCT药品匹配
+"""
+
+
 import os, sys, re, time
+
+from utils import IOUtils
 
 sys.path.append('/home/esuser/NLP35')
 # from __future__ import print_function
@@ -74,7 +81,7 @@ def train(X, vectorizer, true_k=10, minibatch=False, showLable=False):
 
 def out():
 	'''在最优参数下输出聚类结果'''
-	dataset = TableUtils.read_xlsx(file=os.path.join("..", "sources", "NCT Drug（待匹配）.xlsx"), colindexes=(1,),
+	dataset = TableUtils.read_xlsx(file=IOUtils.get_path_sources("NCT Drug（待匹配）.xlsx"), colindexes=(1,),
 								   istitle=True)
 	dataset = [row[0] for row in dataset if row and row[0]]
 	X, vectorizer = transform(dataset, n_features=500)
@@ -89,3 +96,5 @@ if __name__ == '__main__':
 	# 							sheet="clinicaltrials", istitle=True)
 
 	out()
+
+

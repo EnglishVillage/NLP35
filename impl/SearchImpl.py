@@ -1,6 +1,10 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
+"""
+	搜索提示
+"""
+
 import os, sys, re, time
 
 sys.path.append('/home/esuser/NLP35')
@@ -13,11 +17,14 @@ import Levenshtein
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, abort, make_response, request
 
-from utils import OtherUtils, MysqlUtils, MongodbUtils, IOUtils, CollectionUtils, RegexUtils, JiebaUtils
+from utils import OtherUtils, IOUtils, CollectionUtils, RegexUtils, JiebaUtils
+from utils.Utils import MysqlUtils, MongodbUtils
 
-"搜索提示"
 
 app = Flask(__name__)
+mysql_utils = MysqlUtils()
+mongodb_utils = MongodbUtils("cfda_news_notify_content")
+
 dict_dict = {}
 dict_zh = {}
 dict_en = {}
@@ -163,28 +170,6 @@ def split_dict(isfuzzymatch):
 	return new_dict
 
 
-def read_cache(path, mydict):
-	with open(path, "r", encoding="utf-8") as f:
-		for line in f.readlines():
-			if line:
-				newline = line[2:-4]
-				ls = newline.split("', {'")
-				try:
-					mydict[ls[0]] = set(ls[1].split("', '"))
-				except:
-					ls = newline.split(", {")
-					key = ls[0][:-1]
-					setvals = set()
-					vals = ls[1].split(", ")
-					length = len(vals)
-					for i in range(length):
-						if i < length - 1:
-							setvals.add(vals[i][1:-1])
-						else:
-							setvals.add(vals[i][1:])
-					mydict[key] = setvals
-
-
 def remove_multi_drug(zhlist):
 	newlist = []
 	# mulset用来记录最短的key
@@ -199,16 +184,6 @@ def remove_multi_drug(zhlist):
 			mulset.add(t[0])
 			newlist.append(t)
 	return newlist
-
-
-def load_exclude(filenames, myset):
-	if filenames:
-		for name in filenames:
-			IOUtils.my_read(IOUtils.get_path_sources(name), myset)
-		if "" in myset:
-			myset.remove("")
-		if None in myset:
-			myset.remove(None)
 
 
 def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0):
@@ -239,8 +214,8 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	# 判断缓存文件是否存在
 	isexist = os.path.exists(path_zh)
 	if readcache and isexist:
-		read_cache(path_zh, dict_zh)
-		read_cache(path_en, dict_en)
+		IOUtils.my_read_tuple_set(path_zh, dict_zh)
+		IOUtils.my_read_tuple_set(path_en, dict_en)
 		if returntype == 0:
 			new_dict = dict(dict_zh, **dict_en)
 			return new_dict
@@ -251,11 +226,11 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 	else:
 		# 精确匹配,则加载排除字典
 		if not isfuzzymatch:
-			load_exclude(("chinacity.txt", "exclude_drug.txt"), exclude_set)
+			IOUtils.load_exclude(("chinacity.txt", "exclude_drug.txt"), exclude_set)
 		if isdiscover:
-			mydict = MysqlUtils.sql_to_dict(sql_discover_drugs)
+			mydict = mysql_utils.sql_to_dict(sql_discover_drugs)
 		else:
-			mydict = MysqlUtils.sql_to_dict(sql_database_drugs)
+			mydict = mysql_utils.sql_to_dict(sql_database_drugs)
 		preDeal(mydict, isfuzzymatch, isdiscover)
 		new_dict = split_dict(isfuzzymatch)
 
@@ -292,8 +267,7 @@ def writedict(isfuzzymatch=True, isdiscover=True, readcache=False, returntype=0)
 
 
 def loadfuzzydict():
-	srcpath = IOUtils.get_path_sources("searchdrugfuzzy.txt")
-	fuzzys = IOUtils.my_read(srcpath, [])
+	fuzzys = IOUtils.my_read_source("searchdrugfuzzy.txt", [])
 	for s in fuzzys:
 		key = pypinyin.slug(s, separator="")
 		CollectionUtils.add_dict_setvalue_single(dict_default_fuzzy, key, s)
@@ -620,10 +594,9 @@ def search_debug_details(text, isdetail=True):
 
 
 def matchfrommongodb(tokenizer_all):
-	MongodbUtils.set_collection("cfda_news_notify_content")
-	# getlist = MongodbUtils.get_list()
-	getlist = MongodbUtils.get_list({"currentTime": {"$gt": 1494664001430}})
-	# getlist = MongodbUtils.get_list({"_id":ObjectId("5916c2bd3c95966d4b201a68")})
+	# getlist = mongodb_utils.get_list()
+	getlist = mongodb_utils.get_list({"currentTime": {"$gt": 1494664001430}})
+	# getlist = mongodb_utils.get_list({"_id":ObjectId("5916c2bd3c95966d4b201a68")})
 	i = 0
 	right = set()
 	error = set()

@@ -1,9 +1,0 @@
-"biopharmaceuticals", "biopharmaceutical", "pharmaceuticals", "pharmaceutical", "biotechnology",
-			  "venture fund", "therapeutics", "farmaceutici", "laboratories", "engineering", "laboratoire",
-			  "corporation", "biosciences", "bioscience", "biological", "laboratory", "healthcare", "technology",
-			  "biopharma", "biologics", "biologic", "sciences", "ventures", "partners", "products", "medicine",
-			  "venture", "science", "biology", "biotech", "limited", "company", "pharma", "group", "funds", "fund",
-			  "labs", "gmbh", "kgaa", "lllp", "lab", "bio", "inc", "llp", "jsc", "aps", "plc", "llc", "ag", "kg", "lp",
-			  "oy", "sa", "bv"
-			  "corp.,ltd.", "s.a.r.l.", "co.,ltd.", "s.p.a.", "s.a.s", "corp.", "inc.", "ltd.", "b.v.", "n.v.", "co.,",
-			 "pty.", "pte.", "a/s", "co."

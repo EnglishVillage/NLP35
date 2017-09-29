@@ -16,9 +16,11 @@ from operator import itemgetter, attrgetter
 from flask import Flask, jsonify, abort, make_response, request
 from bs4 import BeautifulSoup
 
-from utils import OtherUtils, MysqlUtils
+from utils import OtherUtils
+from utils.Utils import MysqlUtils
 
 app = Flask(__name__)
+mysql_utils = MysqlUtils()
 
 # 从mysql获取到关键字存储到文件中的路径
 createdict_all = os.path.join("..", "sources", "createdict_all")
@@ -68,13 +70,13 @@ def writedict():
 	global set_indication
 	global set_drug_database
 	global set_all
-	set_target = MysqlUtils.sql_to_set(
+	set_target = mysql_utils.sql_to_set(
 		"select abbreviation,standard_name,name_cn,full_name,alternative_name from yymf_discover_target")
-	set_company = MysqlUtils.sql_to_set(
+	set_company = mysql_utils.sql_to_set(
 		"select standard_name_en,standard_name_cn,full_name_en,full_name_cn,alternative_name,name_FDA from yymf_discover_company")
-	set_indication = MysqlUtils.sql_to_set(
+	set_indication = mysql_utils.sql_to_set(
 		"select standard_name_cn,standard_name_en,alternative_name from yymf_discover_indication")
-	set_drug = MysqlUtils.sql_to_set(
+	set_drug = mysql_utils.sql_to_set(
 		"select code,standard_name,simplified_standard_name,bridging_name,active_ingredient_cn,active_ingredient_en,alternative_active_ingredient_name,inn_cn,inn_en,alternative_inn,trade_name_en,trade_name_cn,generic_brand,investigational_code,declaration_cn from yymf_discover_drugs_name_dic")
 	# 合集
 	# set_all=set_target.union(set_company).union(set_indication).union(set_drug)
@@ -107,11 +109,11 @@ def jiebaanalyse(tokenizer, text, wordsset):
 			# 从第2个字符串开始
 			if i > 0:
 				# 尾字符是字母或者数字,判断后一个是否为字母或者数字
-				if i < length - 1 and OtherUtils.contain_eng(str[-1]):
-					if not OtherUtils.contain_eng(lcut[i + 1][0]):
+				if i < length - 1 and RegexUtils.contain_en(str[-1]):
+					if not RegexUtils.contain_en(lcut[i + 1][0]):
 						# 首字符是字母或者数字,判断前一个是否为字母或者数字
-						if OtherUtils.contain_eng(str[0]):
-							if not OtherUtils.contain_eng(lcut[i - 1][-1]):
+						if RegexUtils.contain_en(str[0]):
+							if not RegexUtils.contain_en(lcut[i - 1][-1]):
 								# 判断是否包含在词库中
 								if str in wordsset:
 									keywordsset.add(str)
@@ -120,8 +122,8 @@ def jiebaanalyse(tokenizer, text, wordsset):
 							if str in wordsset:
 								keywordsset.add(str)
 				# 首字符是字母或者数字,判断前一个是否为字母或者数字
-				elif OtherUtils.contain_eng(str[0]):
-					if not OtherUtils.contain_eng(lcut[i - 1][-1]):
+				elif RegexUtils.contain_en(str[0]):
+					if not RegexUtils.contain_en(lcut[i - 1][-1]):
 						# 判断是否包含在词库中
 						if str in wordsset:
 							keywordsset.add(str)
@@ -130,8 +132,8 @@ def jiebaanalyse(tokenizer, text, wordsset):
 					if str in wordsset:
 						keywordsset.add(str)
 			# 尾字符是字母或者数字,判断后一个是否为字母或者数字
-			elif OtherUtils.contain_eng(str[-1]):
-				if not OtherUtils.contain_eng(lcut[i + 1][0]):
+			elif RegexUtils.contain_en(str[-1]):
+				if not RegexUtils.contain_en(lcut[i + 1][0]):
 					# 判断是否包含在词库中
 					if str in wordsset:
 						keywordsset.add(str)

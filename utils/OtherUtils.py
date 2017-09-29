@@ -53,7 +53,7 @@ def review_to_wordlist(str: str, remove_stopwords=False):
 	return (words)
 
 
-def review_to_sentences(review: str, tokenizer, remove_stopwords=False):
+def review_to_sentence(review: str, tokenizer, remove_stopwords=False):
 	'''
 	将评论段落转换为句子，返回句子列表，每个句子由一堆词组成
 	'''
@@ -67,6 +67,9 @@ def review_to_sentences(review: str, tokenizer, remove_stopwords=False):
 			# 获取句子中的词列表
 			sentences.append(review_to_wordlist(raw_sentence, remove_stopwords))
 	return sentences
+
+
+"With all this stuff going down at the moment with MJ i\'ve started listening to his music, watching the odd documentary here and there, watched The Wiz and watched Moonwalker again. Maybe i just want to get a certain insight into this guy who i thought was really cool in the eighties just to maybe make up my mind whether he is guilty or innocent. Moonwalker is part biography, part feature film which i remember going to see at the cinema when it was originally released. Some of it has subtle messages about MJ's feeling towards the press and also the obvious message of drugs are bad m'kay.<br /><br />Visually impressive but of course this is all about Michael Jackson so unless you remotely like MJ in anyway then you are going to hate this and find it boring. Some may call MJ an egotist for consenting to the making of this movie BUT MJ and most of his fans would say that he made it for the fans which if true is really nice of him.<br /><br />The actual feature film bit when it finally starts is only on for 20 minutes or so excluding the Smooth Criminal sequence and Joe Pesci is convincing as a psychopathic all powerful drug lord. Why he wants MJ dead so bad is beyond me. Because MJ overheard his plans? Nah, Joe Pesci's character ranted that he wanted people to know it is he who is supplying drugs etc so i dunno, maybe he just hates MJ's music.<br /><br />Lots of cool things in this like MJ turning into a car and a robot and the whole Speed Demon sequence. Also, the director must have had the patience of a saint when it came to filming the kiddy Bad sequence as usually directors hate working with one kid let alone a whole bunch of them performing a complex dance scene.<br /><br />Bottom line, this movie is for people who like MJ on one level or another (which i think is most people). If not, then stay away. It does try and give off a wholesome message and ironically MJ\'s bestest buddy in this movie is a girl! Michael Jackson is truly one of the most talented people ever to grace this planet but is he guilty? Well, with all the attention i\'ve gave this subject....hmmm well i don\'t know because people can be different behind closed doors, i know this for a fact. He is either an extremely nice but stupid guy or one of the most sickest liars. I hope he is not the latter."
 
 
 def get_deal_data(train):
@@ -84,7 +87,7 @@ def get_deal_data(train):
 def get_sentences_data(train, tokenizer, remove_stopwords=False):
 	sentences = []
 	for i, review in enumerate(train):
-		sentences += review_to_sentences(review, tokenizer, remove_stopwords)
+		sentences += review_to_sentence(review, tokenizer, remove_stopwords)
 	return sentences
 
 

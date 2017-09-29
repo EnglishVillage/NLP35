@@ -1,6 +1,11 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
+
+"""
+	强哥,公司名称精确匹配和模糊匹配
+"""
+
 import os, sys, re, time
 
 sys.path.append('/home/esuser/NLP35')
@@ -9,7 +14,12 @@ from operator import itemgetter
 import Levenshtein
 import pandas as pd
 import csv
-from utils import OtherUtils, MysqlUtils, MongodbUtils, RegexUtils
+from utils import OtherUtils, RegexUtils
+from utils.Utils import MysqlUtils, MongodbUtils
+
+
+mysql_utils = MysqlUtils()
+mongodb_utils = MongodbUtils("prnewswire")
 
 stopwords = ["corp.,ltd.", "s.a.r.l.", "co.,ltd.", "s.p.a.", "s.a.s", "corp.", "inc.", "b.v.", "n.v.", "co.,", "pty.",
 			 "pte.", "a/s", "co."]
@@ -48,8 +58,8 @@ def preDeal(data: str):
 
 
 def writedict():
-	# set_company = MysqlUtils.sqltoset("select standard_name_en,full_name_en,alternative_name,name_FDA from yymf_discover_company")
-	set_company = MysqlUtils.sql_to_set("select standard_name_en,full_name_en from yymf_discover_company")
+	# set_company = mysql_utils.sqltoset("select standard_name_en,full_name_en,alternative_name,name_FDA from yymf_discover_company")
+	set_company = mysql_utils.sql_to_set("select standard_name_en,full_name_en from yymf_discover_company")
 	global dict_dict
 	dict_dict = dict()
 	for name in set_company:
@@ -86,8 +96,7 @@ def writedict():
 
 
 def matchfrommongodb():
-	MongodbUtils.set_collection("prnewswire")
-	getlist = MongodbUtils.get_list()
+	getlist = mongodb_utils.get_list()
 	total = 0
 	i = 0
 	set_right = set()
@@ -198,6 +207,7 @@ def matchfromcsv2():
 
 
 if __name__ == '__main__':
-	writedict()
-	# readdict()
-	matchfromcsv2()
+	# writedict()
+	# # readdict()
+	# matchfromcsv2()
+	matchfrommongodb()

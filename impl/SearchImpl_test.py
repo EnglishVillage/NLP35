@@ -1,12 +1,17 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
+"""
+	静姐,对药品进行模糊匹配结果
+"""
+
 import os, sys, re, time
 
 sys.path.append('/home/esuser/NLP35')
 import pyodbc
-from utils import OtherUtils, MysqlUtils, MongodbUtils, IOUtils, CollectionUtils, RegexUtils
+from utils import OtherUtils, IOUtils, CollectionUtils, RegexUtils
 from impl import SearchImpl
+
 
 if __name__ == '__main__':
 	SearchImpl.writedict()
