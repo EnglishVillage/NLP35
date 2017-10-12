@@ -48,6 +48,8 @@ mydict2 = {"b": 2, "c": 3,"a":{1:"aa",2:"bb"}}
 # aaaa = set(myls)
 # print(aaaa)
 
+if "地平a" not in myls:
+	print(111111)
 
 
 key = "华兰生物工程有限公司"
@@ -77,9 +79,18 @@ setvalues = {}
 
 # aa=RegexUtils.replace_diy_chars(aa, "[a-zA-Z0-9\u4E00-\u9FD5]+", " ")
 # print(aa)
+aa=(1,2)
+cc=(11,2)
+bb=[aa.__str__(),cc.__str__()]
+print("|".join(bb))
+bb=[aa,cc]
+print("|".join(bb))
+print(float("23."))
+print(float("23"))
 
-
-hs=mydict2.get
-print(hs)
+try:
+	float("23a")
+except:
+	pass
 
 

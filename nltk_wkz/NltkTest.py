@@ -204,18 +204,23 @@ from nltk.text import TextCollection
 """余弦定理"""
 
 """Frequency 频率统计【应⽤：⽂本分类】"""
-# # 做个词库先
-# corpus = 'this is my sentence this is my life this is the day'
-# # 随便tokenize⼀下
-# # 显然, 正如上文提到,
-# # 这里可以根据需要做任何的preprocessing:
-# # stopwords, lemma, stemming, etc.
-# tokens = nltk.word_tokenize(corpus)
-# # print(tokens)
-# # 得到token好的word list
-# # ['this', 'is', 'my', 'sentence', 'this', 'is', 'my', 'life', 'this', 'is', 'the', 'day']
-# # 借用NLTK的FreqDist统计一下文字出现的频率
-# fdist = FreqDist(tokens)
+# 做个词库先
+corpus = 'this is my sentence this is my life this is the day'
+# 随便tokenize⼀下
+# 显然, 正如上文提到,
+# 这里可以根据需要做任何的preprocessing:
+# stopwords, lemma, stemming, etc.
+tokens = nltk.word_tokenize(corpus)
+# print(tokens)
+# 得到token好的word list
+# ['this', 'is', 'my', 'sentence', 'this', 'is', 'my', 'life', 'this', 'is', 'the', 'day']
+# 借用NLTK的FreqDist统计一下文字出现的频率
+fdist = FreqDist(tokens)
+print(fdist)
+# 所有词加上重复的个数
+# fdist.N()
+# 去重後的个数
+# len(fdist)
 # # 它就类似于一个Dict
 # # 带上某个单词, 可以看到它在整个文章中出现的次数
 # # print(fdist['is'])
