@@ -17,6 +17,7 @@ from utils import RegexUtils
 from utils import StringUtils
 
 sys.path.append('/home/esuser/NLP35')
+import numpy as np
 import pandas as pd
 
 try:
@@ -40,7 +41,7 @@ myls = ["普利", "地平", "哌唑", "列汀", "列酮", "那非", "特罗", "�
 		"沙坦", "洛韦", "培南", "泊帕", "那肽", "他汀", "替尼", "噻嗪", "溴索", "特罗", "格雷", "福韦"]
 myls2 = [1, 2, 3, [3, 4, 5]]
 mydict = {"b": 22, "c": 33, "a": [1, 2, 3]}
-mydict2 = {"b": 2, "c": 3,"a":{1:"aa",2:"bb"}}
+mydict2 = {"b": 2, "c": 3, "a": {1: "aa", 2: "bb"}}
 # myls=[]
 # myls.append(mydict)
 # myls.append(mydict2)
@@ -50,7 +51,6 @@ mydict2 = {"b": 2, "c": 3,"a":{1:"aa",2:"bb"}}
 
 if "地平a" not in myls:
 	print(111111)
-
 
 key = "华兰生物工程有限公司"
 valuesdesc = ["华兰生物工程股份有限公司", "华兰生物工程重庆有限公司"]
@@ -79,18 +79,4 @@ setvalues = {}
 
 # aa=RegexUtils.replace_diy_chars(aa, "[a-zA-Z0-9\u4E00-\u9FD5]+", " ")
 # print(aa)
-aa=(1,2)
-cc=(11,2)
-bb=[aa.__str__(),cc.__str__()]
-print("|".join(bb))
-bb=[aa,cc]
-print("|".join(bb))
-print(float("23."))
-print(float("23"))
-
-try:
-	float("23a")
-except:
-	pass
-
 

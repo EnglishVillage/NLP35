@@ -1,6 +1,10 @@
 #!/usr/bin/python3.5
 # -*- coding:utf-8 -*-
 
+"""
+公司,药品匹配返回标准名
+"""
+
 import os, sys, re, time
 
 sys.path.append('/home/esuser/NLP35')
