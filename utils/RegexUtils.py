@@ -106,7 +106,7 @@ def replace_diy_chars(txt, pattern, repl=""):
 
 def get_word_nospecial(word, repl=""):
 	"""
-	只获取中英文数字
+	只获取:数字字母希腊字母中文
 	:param word:
 	:param repl:
 	:return:

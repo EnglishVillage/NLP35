@@ -7,15 +7,20 @@ sys.path.append('/home/esuser/NLP35')
 from utils import RegexUtils
 
 
-def replace_key(text, replace_dict):
+def replace_key(text, replace_dict,*dicts):
 	"""
 	替换
 	:param text: 被替换文本
 	:param replace_dict: 要替换的dict
+	:param dicts: 要替换的dict
 	:return:
 	"""
 	for k, v in replace_dict.items():
 		text = text.replace(k, v)
+	if dicts:
+		for dict in dicts:
+			for k, v in dict.items():
+				text = text.replace(k, v)
 	return text
 
 

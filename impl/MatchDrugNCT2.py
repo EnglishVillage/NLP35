@@ -1,5 +1,9 @@
 # !/usr/bin/python3.5
 # -*- coding:utf-8 -*-
+
+import os, sys, re, time
+
+sys.path.append("/home/esuser/NLP35")
 import jieba, math
 import numpy as np
 import pandas as pd
@@ -9,7 +13,6 @@ from nltk import FreqDist
 from utils import IOUtils
 from utils import RegexUtils
 from utils import StringUtils
-
 try:
 	import cPickle as pickle  # 序列化
 except ImportError:
@@ -28,12 +31,14 @@ path_dict_new = IOUtils.get_path_target(name_dict_new)
 path_dict_temp = IOUtils.get_path_target(name_dict_temp)
 path_dict_dealed = IOUtils.get_path_target(name_dict_dealed)
 
-field_source_remove = "clinicalTrialsGovIdentifier"
-field_source_distinct = "intervention"
-field_source_add = "分词後的词库字典"
+
 name_source = "NCT Drug（待匹配）.xlsx"
 name_source_new = "{}{}".format("new_", name_source)
 name_source_dealed = "drug_nct_source_dealed.pkl"
+
+field_source_remove = "clinicalTrialsGovIdentifier"
+field_source_distinct = "intervention"
+field_source_add = "分词後的词库字典"
 
 path_source = IOUtils.get_path_sources(name_source)
 path_source_new = IOUtils.get_path_target(name_source_new)
@@ -302,6 +307,7 @@ def deal_source2(mysource=None, readcache=True):
 		mysource[field_source_add] = mysource[field_source_add].astype(str)
 		mysource.to_excel(path_source_new, index=False)
 	return mysource
+
 
 def dealed_source(mysource, dict_dict, readcache=True):
 	if readcache and IOUtils.exist_path(path_source_dealed):

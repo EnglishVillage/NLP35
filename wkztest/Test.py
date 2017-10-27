@@ -80,3 +80,21 @@ setvalues = {}
 # aa=RegexUtils.replace_diy_chars(aa, "[a-zA-Z0-9\u4E00-\u9FD5]+", " ")
 # print(aa)
 
+
+aa="a()sdf(sdfa)bb(dd)bb(sdfa)(bzz)"
+# aa="adasdfs"
+match = re.findall("\(.*?\)", aa)
+print(match)
+begin=0
+for m in match:
+	index=aa.index(m,begin)
+	if begin<index:
+		print(aa[begin:index])
+	print(m)
+	begin=index+len(m)
+	# print(begin)
+if begin <len(aa):
+	print(aa[begin:])
+# print(match)
+
+

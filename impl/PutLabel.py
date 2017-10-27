@@ -4,12 +4,10 @@
 	打标签功能
 """
 import os, sys, re, time
-from collections import OrderedDict
-
-import Levenshtein
 
 sys.path.append('/home/esuser/NLP35')
-
+from collections import OrderedDict
+import Levenshtein
 import jieba
 from bs4 import BeautifulSoup
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -373,7 +371,7 @@ def timer_load_dict(readcache):
 		tokenizer_discover_company.initialized = initialized
 		tokenizer_discover_company.initialize(jieba_dict_discover_company)
 	except Exception as e:
-		print("【更新字典失败】【%s】：%s" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
+		print("【更新字典失败】%s：%s" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
 
 
 # 重新加载字典

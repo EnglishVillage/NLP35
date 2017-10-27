@@ -10,6 +10,8 @@ try:
 except ImportError:
 	import simplejson as json  # python <= 2.5
 
+# 时间格式
+ISOTIMEFORMAT = "%Y-%m-%d %X"
 
 def get_path_target(filename, *dirs):
 	"""
@@ -105,10 +107,16 @@ def my_write_match_dict(new_dict, dict_zh, dict_en, path_zh, path_en, jieba_dict
 	if iswritedict:
 		mylist = list(dict_zh.items())
 		mylist.sort(key=lambda t: len(t[0]), reverse=True)
-		my_write(path_zh, mylist)
+		try:
+			my_write(path_zh, mylist)
+		except Exception as e:
+			print("写入失败%s:【%s】" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
 		mylist = list(dict_en.items())
 		mylist.sort(key=lambda t: len(t[0]), reverse=True)
-		my_write(path_en, mylist)
+		try:
+			my_write(path_en, mylist)
+		except Exception as e:
+			print("写入失败%s:【%s】" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
 		# 写入结巴字典
 		dict_set_all = set(new_dict.keys())
 		JiebaUtils.writefile(jieba_dict_path_all, dict_set_all)
@@ -119,10 +127,17 @@ def my_write_match_dict(new_dict, dict_zh, dict_en, path_zh, path_en, jieba_dict
 	else:
 		zhls = list(dict_zh.keys())
 		zhls.sort(key=lambda t: len(t), reverse=True)
-		my_write(path_zh, zhls)
+		try:
+			my_write(path_zh, zhls)
+		except Exception as e:
+			print("写入失败%s:【%s】" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
 		enls = list(dict_en.keys())
 		enls.sort(key=lambda t: len(t), reverse=True)
-		my_write(path_en, enls)
+		try:
+			my_write(path_en, enls)
+		except Exception as e:
+			print("写入失败%s:【%s】" % (time.strftime(ISOTIMEFORMAT, time.localtime()), e))
+
 
 
 def my_read_source(filename, data=[]):
